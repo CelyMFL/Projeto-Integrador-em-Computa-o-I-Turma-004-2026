@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Sistema{% endblock %}</title>
+</head>
+<body>
+
+    <nav>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('checklist.home') }}">Checklist</a>
+            
+            {% if current_user.is_admin %} <a href="{{ url_for('admin.index') }}">Admin</a>
+            {% endif %}
+
+            <a href="{{ url_for('auth.logout') }}">Logout (Sair)</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}">Entrar</a>
+        {% endif %}
+    </nav>
+
+    <hr>
+
+    {% block content %}{% endblock %}
+
+</body>
+</html>
