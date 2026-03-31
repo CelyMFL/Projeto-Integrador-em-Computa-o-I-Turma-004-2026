@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Checklist{% endblock %}
+
+{% block content %}
+<h2>Checklist</h2>
+
+<p>Bem-vindo, {{ user.nome }}</p>
+
+<ul>
+    {% for task in tasks %}
+        <li>
+            {{ task.descricao }} - {{ task.status }}
+        </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

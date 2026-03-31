@@ -1,0 +1,36 @@
+from flask import Flask, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+
+db = SQLAlchemy()
+login_manager = LoginManager()
+
+def create_app():
+    app = Flask(__name__)
+    
+    app.config.from_object('config')
+
+    db.init_app(app)
+    
+    login_manager.init_app(app)
+    login_manager.login_view = "auth.login"
+
+    from app.models.user import User
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    @app.route('/')
+    def index():
+        return redirect(url_for('auth.login'))
+
+    from app.routes.auth_routes import auth
+    from app.routes.checklist_routes import checklist
+    from app.routes.admin_routes import admin
+
+    app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(checklist, url_prefix='/checklist')
+    app.register_blueprint(admin, url_prefix='/admin')
+
+    return app
