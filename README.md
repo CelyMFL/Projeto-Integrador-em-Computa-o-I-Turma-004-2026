@@ -116,6 +116,45 @@ db.create_all()
 
 ---
 
+## 🔧 Estado atual do backend
+
+O projeto já entrega a base funcional do onboarding docente.
+
+### Perfis de usuário
+
+- `professor`: acessa trilhas, conclui tarefas e envia feedback
+- `gestao`: acompanha métricas e feedbacks
+- `admin`: cria e administra trilhas, tarefas e relatórios
+
+### Fluxo de onboarding
+
+- Trilhas representam os caminhos de onboarding
+- Cada trilha possui tarefas ordenadas
+- O professor pode iniciar uma trilha e marcar tarefas como concluídas
+- O sistema acompanha progresso e conclui a trilha automaticamente quando necessário
+
+### Feedback
+
+- O professor pode enviar feedback sobre uma trilha ou sobre o processo geral
+- O gestor e o admin podem consultar os registros para análise
+
+### Principais rotas disponíveis
+
+- `GET /auth/login` e `POST /auth/login`
+- `GET /checklist/`
+- `GET /admin/` e `GET /admin/analytics`
+- `GET /gestao/` e `GET /gestao/analytics`
+- `GET /trilhas/`, `POST /trilhas/`, `GET /trilhas/<id>`, `PUT /trilhas/<id>`, `DELETE /trilhas/<id>`
+- `POST /trilhas/<id>/start`, `GET /trilhas/<id>/progress`, `POST /trilhas/<id>/tasks`
+- `POST /tasks/<id>/complete`, `POST /tasks/<id>/incomplete`, `GET /tasks/<id>/status`
+- `POST /feedback/`, `GET /feedback/my-feedback`, `GET /feedback/trilha/<id>`, `GET /feedback/`
+
+### Observação para a equipe de front-end
+
+A interface atual é propositalmente mínima. O backend já expõe os dados em JSON nas rotas novas, então o próximo passo natural é construir telas ou consumir esses endpoints em outra camada.
+
+---
+
 ## 👨‍💻 Autores
 
 Eric Armendani Gonçalves

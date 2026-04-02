@@ -28,9 +28,17 @@ def create_app():
     from app.routes.auth_routes import auth
     from app.routes.checklist_routes import checklist
     from app.routes.admin_routes import admin
+    from app.routes.gestao_routes import gestao
+    from app.routes.trilha_routes import trilhas
+    from app.routes.task_routes import tasks
+    from app.routes.feedback_routes import feedback
 
     app.register_blueprint(auth, url_prefix='/auth')
     app.register_blueprint(checklist, url_prefix='/checklist')
     app.register_blueprint(admin, url_prefix='/admin')
+    app.register_blueprint(gestao, url_prefix='/gestao')
+    app.register_blueprint(trilhas, url_prefix='/trilhas')
+    app.register_blueprint(tasks, url_prefix='/tasks')
+    app.register_blueprint(feedback, url_prefix='/feedback')
 
     return app
