@@ -18,6 +18,7 @@ trilhas = Blueprint('trilhas', __name__)
 
 def _payload():
     """Read JSON or form data with the same code path."""
+    # Front-end screens can submit either content type without changing endpoint behavior.
     data = request.get_json(silent=True)
     if data is None:
         data = request.form.to_dict()
@@ -30,6 +31,9 @@ def _serialize_task(task):
         'id': task.id,
         'descricao': task.descricao,
         'ordem': task.ordem,
+        'material_apoio': task.material_apoio,
+        'link_apoio': task.link_apoio,
+        'documento_apoio': task.documento_apoio,
     }
 
 
@@ -41,6 +45,7 @@ def _serialize_trilha(trilha):
         'descricao': trilha.descricao,
         'tipo': trilha.tipo.value if trilha.tipo else None,
         'obrigatoria': trilha.obrigatoria,
+        # Always return tasks ordered by "ordem" for stable rendering in the UI.
         'tasks': [_serialize_task(task) for task in sorted(trilha.tasks, key=lambda item: item.ordem)],
     }
 
@@ -174,6 +179,9 @@ def add_task(trilha_id):
             checklist_id=trilha_id,
             descricao=data.get('descricao'),
             ordem=int(data['ordem']) if data.get('ordem') not in (None, '') else None,
+            material_apoio=data.get('material_apoio'),
+            link_apoio=data.get('link_apoio'),
+            documento_apoio=data.get('documento_apoio'),
         )
         return jsonify(_serialize_task(task)), 201
     except (ValueError, TypeError) as error:

@@ -12,6 +12,7 @@ tasks = Blueprint('tasks', __name__)
 
 def _payload():
     """Read JSON or form data and return a plain dictionary."""
+    # Keep route behavior identical for browser forms and API calls.
     data = request.get_json(silent=True)
     if data is None:
         data = request.form.to_dict()
@@ -25,6 +26,9 @@ def _serialize_task(task):
         'descricao': task.descricao,
         'ordem': task.ordem,
         'checklist_id': task.checklist_id,
+        'material_apoio': task.material_apoio,
+        'link_apoio': task.link_apoio,
+        'documento_apoio': task.documento_apoio,
     }
 
 
@@ -95,6 +99,9 @@ def update_task(task_id):
             task_id=task_id,
             descricao=data.get('descricao'),
             ordem=int(data['ordem']) if data.get('ordem') not in (None, '') else None,
+            material_apoio=data.get('material_apoio') if 'material_apoio' in data else None,
+            link_apoio=data.get('link_apoio') if 'link_apoio' in data else None,
+            documento_apoio=data.get('documento_apoio') if 'documento_apoio' in data else None,
         )
         return jsonify(_serialize_task(task))
     except (ValueError, TypeError) as error:
@@ -123,6 +130,7 @@ def reorder_tasks(trilha_id):
         return jsonify({'error': 'Acesso negado'}), 403
 
     data = _payload()
+    # Allow both list input and comma-separated strings for easier integration.
     task_ids = data.get('task_ids', [])
     if isinstance(task_ids, str):
         task_ids = [int(value) for value in task_ids.split(',') if value.strip()]

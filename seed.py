@@ -2,7 +2,6 @@ from app import create_app, db
 from app.models.user import User, RoleEnum
 from app.models.task import Task
 from app.models.checklist import Checklist
-from app.models.user_task import UserTask
 from werkzeug.security import generate_password_hash
 
 

@@ -6,7 +6,7 @@ class TaskService:
     """Service for task management."""
 
     @staticmethod
-    def create_task(checklist_id, descricao, ordem=None):
+    def create_task(checklist_id, descricao, ordem=None, material_apoio=None, link_apoio=None, documento_apoio=None):
         """
         Create a new task in a trilha.
         
@@ -14,6 +14,9 @@ class TaskService:
             checklist_id: Trilha (Checklist) ID
             descricao: Task description
             ordem: Task order (optional, auto-incremented if not provided)
+            material_apoio: Optional support material description
+            link_apoio: Optional support URL
+            documento_apoio: Optional support document identifier
             
         Returns:
             Task object or raises ValueError
@@ -37,7 +40,10 @@ class TaskService:
             task = Task(
                 descricao=descricao.strip(),
                 checklist_id=checklist_id,
-                ordem=ordem if ordem else 1
+                ordem=ordem if ordem else 1,
+                material_apoio=material_apoio.strip() if material_apoio else None,
+                link_apoio=link_apoio.strip() if link_apoio else None,
+                documento_apoio=documento_apoio.strip() if documento_apoio else None,
             )
             db.session.add(task)
             db.session.commit()
@@ -61,7 +67,7 @@ class TaskService:
         return Task.query.filter_by(checklist_id=checklist_id).order_by(Task.ordem).all()
 
     @staticmethod
-    def update_task(task_id, descricao=None, ordem=None):
+    def update_task(task_id, descricao=None, ordem=None, material_apoio=None, link_apoio=None, documento_apoio=None):
         """
         Update task information.
         
@@ -69,6 +75,9 @@ class TaskService:
             task_id: Task ID
             descricao: New description (optional)
             ordem: New order (optional)
+            material_apoio: New support material (optional)
+            link_apoio: New support URL (optional)
+            documento_apoio: New support document identifier (optional)
             
         Returns:
             Updated Task or raises ValueError
@@ -86,6 +95,15 @@ class TaskService:
             if not isinstance(ordem, int) or ordem < 1:
                 raise ValueError("Ordem must be a positive integer")
             task.ordem = ordem
+
+        if material_apoio is not None:
+            task.material_apoio = material_apoio.strip() if material_apoio else None
+
+        if link_apoio is not None:
+            task.link_apoio = link_apoio.strip() if link_apoio else None
+
+        if documento_apoio is not None:
+            task.documento_apoio = documento_apoio.strip() if documento_apoio else None
         
         try:
             db.session.commit()

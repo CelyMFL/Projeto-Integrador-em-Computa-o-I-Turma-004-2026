@@ -28,10 +28,8 @@ def login():
 
             if user.role == RoleEnum.ADMIN:
                 return redirect(url_for('admin.home'))
-            elif user.role == RoleEnum.GESTAO:
-                return redirect(url_for('gestao.home'))
             else:
-                return redirect(url_for('checklist.home'))
+                return redirect(url_for('professor.dashboard'))
 
     return render_template('login.html')
 

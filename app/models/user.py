@@ -6,7 +6,6 @@ from app import db
 
 class RoleEnum(enum.Enum):
     PROFESSOR = "professor"
-    GESTAO = "gestao"
     ADMIN = "admin"
 
 
