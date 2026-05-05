@@ -1,135 +1,257 @@
-# Projeto Integrador - Aplicação Flask + MySQL
+# Projeto Integrador - Backend de Onboarding Docente
 
-## 📌 Descrição
+Backend Flask para onboarding de professores, com autenticação, trilhas, tarefas e feedback.
 
-Este projeto é uma aplicação backend desenvolvida com Flask, utilizando banco de dados MySQL e executada em ambiente containerizado com Docker.
+Este repositório foi consolidado para manter somente fluxos ativos ou planejados para o produto atual.
 
-O objetivo é estruturar uma aplicação seguindo boas práticas de arquitetura, separando responsabilidades entre camadas como rotas, serviços, modelos e templates.
+## Escopo Atual
 
----
+Perfis suportados:
+- professor
+- admin
 
-## 🏗️ Arquitetura do Projeto
+Fluxos suportados:
+- login com sessão
+- dashboard do professor
+- visualização de trilha e tarefa
+- conclusão de tarefa
+- envio de feedback do professor
+- painel e gestão administrativa (professores, trilhas, tarefas e feedbacks)
 
-A aplicação segue uma arquitetura em camadas:
+## Arquitetura
 
-```
-routes (camada HTTP)
-   ↓
-services (regras de negócio)
-   ↓
-models (entidades / banco de dados)
-   ↓
-database (MySQL)
-```
+A aplicação segue camadas:
 
-### 📁 Estrutura de pastas
+- routes: endpoints HTTP (contrato consumido pelo front)
+- services: regras de negócio
+- models: entidades do banco
+- database: MySQL
 
-```
-app/
- ├── models/        # Definição das entidades do banco
- ├── services/      # Regras de negócio
- ├── routes/        # Endpoints da API
- ├── templates/     # Templates HTML (renderização)
- └── __init__.py    # Inicialização do app
-```
+Estrutura principal:
 
----
+- app/models
+- app/services
+- app/routes
+- app/templates
+- app/__init__.py
 
-## ⚙️ Tecnologias utilizadas
+## Stack
 
 - Python
 - Flask
+- Flask-Login
+- Flask-SQLAlchemy
 - SQLAlchemy
 - MySQL
 - Docker
 
----
+## Execução Local
 
-## 🧠 Conceitos aplicados
+1. Subir banco MySQL:
 
-### Models
-
-Responsáveis por representar as tabelas do banco de dados utilizando SQLAlchemy.
-
-### Services
-
-Camada responsável pelas regras de negócio da aplicação. Centraliza a lógica e evita acoplamento com as rotas.
-
-### Routes
-
-Responsáveis por expor a API HTTP e receber requisições.
-
-### Templates
-
-Responsáveis pela renderização de páginas HTML utilizando o mecanismo de templates do Flask.
-
----
-
-## 🚀 Como executar o projeto
-
-### 1. Subir os containers
-
-```
-docker-compose up --build
+```bash
+docker-compose up -d
 ```
 
-### 2. Acessar a aplicação
+2. Instalar dependências:
 
-A aplicação estará disponível em:
-
-```
-http://localhost:5000
+```bash
+pip install -r requirements.txt
 ```
 
----
+3. Criar tabelas:
 
-## 🗄️ Banco de dados
-
-O banco de dados é gerenciado via SQLAlchemy.
-
-Para criação inicial das tabelas:
-
-```
-from app import db
-
-db.create_all()
+```bash
+python create_db.py
 ```
 
----
+4. Rodar aplicação:
 
-## 📌 Funcionalidades atuais
+```bash
+python run.py
+```
 
-- Estrutura base do projeto
-- Integração com banco MySQL
-- Criação de models
-- Implementação da camada de services
-- Suporte a templates HTML
+Aplicação em http://localhost:5000.
 
----
+## Modelo de Dados Ativo
 
-## 📈 Próximos passos
+### User
+- nome
+- email
+- senha (hash)
+- role: professor | admin
 
-- Implementar rotas (CRUD)
-- Adicionar migrations
-- Criar validações
-- Implementar autenticação
+### Checklist (trilha)
+- nome
+- descricao
+- tipo: pedagogica | institucional | tecnologica
+- obrigatoria
 
----
+### Task
+- descricao
+- ordem
+- checklist_id
+- material_apoio
+- link_apoio
+- documento_apoio
 
-## 👨‍💻 Autores
+### ProfessorTrilha
+- professor_id
+- trilha_id
+- status: nao_iniciado | em_andamento | concluido
+- data_inicio
+- data_conclusao
 
-Eric Armendani Gonçalves
+### ProfessorChecklist
+- professor_id
+- task_id
+- concluido
+- data_conclusao
 
-Guilherme de Oliveira Ortiz
+### Feedback
+- professor_id
+- trilha_id (opcional)
+- comentario
+- data_envio
 
-Heitor Fernando Almeida
+## Rotas e Contratos para Front-end
 
-Joyce Sarmento de Lima
+Todas as rotas abaixo exigem sessão autenticada, exceto login.
 
-Kerly Yukie Shoji
+### Autenticação
 
-Marcely Migliorini Fernandes Luna
+- GET /auth/login
+  - Exibe tela de login atual.
 
-Pablo Aciole Vieira
+- POST /auth/login
+  - Form-data: email, senha
+  - Redireciona:
+    - admin -> /admin/
+    - professor -> /professor/dashboard
 
-Thiago Lupinaci Cavalcante de Almeida
+- GET /auth/logout
+  - Encerra sessão.
+
+## Professor - 4 telas
+
+### 1) Dashboard / Minha integração
+
+- GET /professor/dashboard
+
+Retorna:
+- user
+- trilhas_atribuidas
+- progresso_geral
+- proximas_tarefas
+- trilhas_obrigatorias
+
+### 2) Tela da trilha
+
+- GET /professor/trilhas/<trilha_id>
+
+Retorna:
+- dados da trilha
+- status da trilha para o professor
+- progresso na trilha
+- tasks com status individual
+
+### 3) Tela da tarefa
+
+- GET /professor/tarefas/<task_id>
+
+Retorna:
+- descricao
+- status
+- checklist_id
+- material_apoio
+- link_apoio
+- documento_apoio
+
+Marcar concluida/pendente:
+- POST /tasks/<task_id>/complete
+- POST /tasks/<task_id>/incomplete
+- GET /tasks/<task_id>/status
+
+### 4) Feedback
+
+- GET /professor/feedback
+  - Contexto para formulário (campos e trilhas disponíveis).
+
+- POST /professor/feedback
+  - Body JSON ou form-data:
+    - comentario (obrigatorio)
+    - trilha_id (opcional)
+
+## Admin - 4 telas
+
+### 1) Painel administrativo
+
+- GET /admin/
+  - Renderiza template administrativo mínimo com métricas.
+
+- GET /admin/analytics
+  - Retorna métricas em JSON:
+    - total_users
+    - total_professores
+    - total_trilhas
+    - total_obrigatorias
+    - total_feedbacks
+    - trilhas_concluidas
+    - trilhas_em_andamento
+
+### 2) Gestão de professores
+
+- GET /admin/professores
+  - Lista professores, status, trilhas atribuídas e andamento.
+
+- POST /admin/professores
+  - Cria professor.
+  - Campos: nome, email, senha.
+
+- PUT/PATCH /admin/professores/<user_id>
+  - Edita professor.
+  - Campos opcionais: nome, email, senha.
+
+### 3) Gestão de trilhas
+
+- GET /admin/trilhas
+  - Lista trilhas (nome, tipo, obrigatória/opcional, descrição, total de tarefas).
+
+CRUD de trilhas e atribuição funcional:
+- GET /trilhas/
+- POST /trilhas/
+- GET /trilhas/<trilha_id>
+- PUT/PATCH /trilhas/<trilha_id>
+- DELETE /trilhas/<trilha_id>
+- POST /trilhas/<trilha_id>/start
+- GET /trilhas/<trilha_id>/progress
+
+### 4) Gestão de tarefas / feedbacks
+
+- GET /admin/tarefas-feedbacks
+  - Retorna tarefas por trilha e feedbacks enviados.
+
+Gestão de tarefas:
+- POST /trilhas/<trilha_id>/tasks
+- PUT/PATCH /tasks/<task_id>
+- DELETE /tasks/<task_id>
+- POST /tasks/trilhas/<trilha_id>/reorder
+
+## Regras de Permissão
+
+- professor:
+  - pode acessar rotas /professor
+  - pode atualizar status de tarefas em /tasks/<id>/complete|incomplete
+  - nao pode acessar rotas /admin
+
+- admin:
+  - pode acessar rotas /admin, /trilhas e rotas administrativas de /tasks
+  - nao usa rotas de jornada do professor
+
+## Observação de Banco
+
+Se o banco já estava criado antes das últimas mudanças, pode ser necessário atualizar schema para:
+- remoção/ajuste de enum antigo de role
+- inclusão dos campos de apoio em tasks
+
+O projeto ainda usa create_all (sem migrations automáticas).
