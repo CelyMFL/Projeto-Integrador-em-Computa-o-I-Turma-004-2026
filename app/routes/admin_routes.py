@@ -1,4 +1,4 @@
-"""Admin routes for dashboard and management screens."""
+"""Rotas do administrador para telas de gestão e dashboard."""
 
 from flask import Blueprint, render_template, jsonify, request
 from flask_login import login_required, current_user
@@ -16,7 +16,8 @@ admin = Blueprint('admin', __name__)
 
 
 def _payload():
-    # Centralized payload parser to keep request handling consistent across admin endpoints.
+    """Extrai os dados da requisição suportando JSON ou form-data para manter 
+    consistência em todos os endpoints de administração."""
     data = request.get_json(silent=True)
     if data is None:
         data = request.form.to_dict()
@@ -24,7 +25,7 @@ def _payload():
 
 
 def build_dashboard_metrics():
-    """Build a compact set of metrics for the admin dashboard."""
+    """Constrói um conjunto de métricas para exibição no dashboard do admin."""
     total_users = User.query.count()
     total_professores = User.query.filter_by(role=RoleEnum.PROFESSOR).count()
     total_trilhas = Checklist.query.count()
@@ -46,7 +47,9 @@ def build_dashboard_metrics():
 @admin.route('/')
 @login_required
 def home():
-    """Render the admin dashboard template."""
+    """Renderiza a landing page de administração.
+    
+    Apenas usuários com perfil de Admin têm acesso a esta rota."""
     if current_user.role != RoleEnum.ADMIN:
         return "Acesso negado", 403
 
@@ -56,7 +59,9 @@ def home():
 @admin.route('/analytics')
 @login_required
 def analytics():
-    """Expose the same dashboard metrics as JSON for future UI use."""
+    """Expõe as métricas do dashboard em formato JSON.
+    
+    Útil para eventuais integrações frontend (UI)."""
     if current_user.role != RoleEnum.ADMIN:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -66,7 +71,7 @@ def analytics():
 @admin.route('/professores', methods=['GET'])
 @login_required
 def professores():
-    """Tela: Gestão de professores (listagem)."""
+    """Recupera e lista os professores cadastrados e o andamento em suas respectivas trilhas."""
     if current_user.role != RoleEnum.ADMIN:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -115,7 +120,7 @@ def professores():
 @admin.route('/professores', methods=['POST'])
 @login_required
 def create_professor():
-    """Tela: Gestão de professores (cadastro)."""
+    """Realiza o cadastro de um novo usuário com perfil de professor."""
     if current_user.role != RoleEnum.ADMIN:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -140,7 +145,7 @@ def create_professor():
 @admin.route('/professores/<int:user_id>', methods=['PUT', 'PATCH'])
 @login_required
 def update_professor(user_id):
-    """Tela: Gestão de professores (edição)."""
+    """Atualiza as informações de cadastro (nome, email ou senha) de um professor específico."""
     if current_user.role != RoleEnum.ADMIN:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -174,7 +179,7 @@ def update_professor(user_id):
 @admin.route('/trilhas', methods=['GET'])
 @login_required
 def trilhas_management():
-    """Tela: Gestão de trilhas (listagem)."""
+    """Lista todas as trilhas disponíveis para o sistema."""
     if current_user.role != RoleEnum.ADMIN:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -195,7 +200,7 @@ def trilhas_management():
 @admin.route('/tarefas-feedbacks', methods=['GET'])
 @login_required
 def tasks_feedbacks_management():
-    """Tela: Gestão de tarefas / feedbacks."""
+    """Fornece um catálogo das tarefas e o fluxo contínuo de feedbacks submetidos."""
     if current_user.role != RoleEnum.ADMIN:
         return jsonify({'error': 'Acesso negado'}), 403
 

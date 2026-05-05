@@ -14,5 +14,5 @@ class ProfessorChecklist(db.Model):
     data_conclusao = Column(DateTime, nullable=True)
     
     # Relationships
-    professor = relationship('User', foreign_keys=[professor_id])
+    professor = relationship('User', foreign_keys=[professor_id], back_populates='professor_checklists')
     task = relationship('Task', foreign_keys=[task_id])
