@@ -1,14 +1,49 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="pt-br">
 
-{% block title %}Login{% endblock %}
+<head>
+    <!-- Definição de codificação de caracteres e configurações de viewport para responsividade -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina de acesso</title>
+    <!-- Vinculação do arquivo de estilos externo -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 
-{% block content %}
-<h2>Login</h2>
+<body>
+    <!-- Container principal que utiliza Flexbox para organizar o conteúdo em colunas/linhas -->
+    <div class="main-container">
 
-<form method="POST">
-    <input type="email" name="email" placeholder="Email"><br><br>
-    <input type="password" name="senha" placeholder="Senha"><br><br>
-    <button type="submit">Entrar</button>
-</form>
+        <!-- Seção de boas-vindas: Fornece contexto e clareza sobre o propósito do portal -->
+        <div class="welcome-section">
+            <h1>Bem-vindo ao Onboarding</h1>
+            <p class="subtitle">
+                Sua jornada começa aqui. Este portal foi criado para guiar seus primeiros passos,
+                centralizando todas as informações e trilhas de conhecimento que você precisa
+                para crescer com a gente.
+            </p>
+        </div>
 
-{% endblock %}
+        <!-- Container do formulário: Centraliza visualmente a interface de autenticação -->
+        <div class="login-container">
+            <form method="POST">
+                <h2>Login</h2>
+
+                <!-- O uso de labels associados aos inputs via 'for' melhora a acessibilidade -->
+                <label for="usuario">E-mail:</label>
+                <input type="email" id="usuario" name="email" placeholder="Digite seu e-mail" required>
+
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+
+                <!-- Botão de submissão. O type="submit" garante a funcionalidade padrão do formulário -->
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+    </div>
+</body>
+<footer>
+    <p>Criado para a disciplina Projeto Integrador I da Universidade Virtual do Estado de São Paulo </p>
+</footer>
+
+</html>
