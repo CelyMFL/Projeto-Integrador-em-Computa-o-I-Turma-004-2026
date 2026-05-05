@@ -1,8 +1,7 @@
 from app import create_app, db
-from app.models.user import User
+from app.models.user import User, RoleEnum
 from app.models.task import Task
 from app.models.checklist import Checklist
-from app.models.user_task import UserTask
 from werkzeug.security import generate_password_hash
 
 
@@ -13,7 +12,7 @@ with app.app_context():
         nome="Professor Teste",
         email="prof@test.com",
         senha=generate_password_hash("123"),
-        tipo="professor"
+        role=RoleEnum.PROFESSOR
     )
 
     db.session.add(user)
