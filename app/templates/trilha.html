@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trilha Pedagógica</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-content">
+      <div>
+        <span class="eyebrow">Trilha de onboarding</span>
+        <h1>{{ trilha.nome }}</h1>
+        <p>{{ trilha.descricao }}</p>
+      </div>
+
+      <nav class="topnav">
+        <a href="{{ url_for('professor.dashboard') }}">Dashboard</a>
+        <a href="#" class="active">Trilhas</a>
+        <a href="{{ url_for('professor.feedback_form_context') }}">Feedback</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero-card">
+      <div>
+        <span class="tag tag-{{ 'blue' if trilha.tipo == 'pedagógica' else 'green' if trilha.tipo == 'institucional' else 'purple' }}">{{ trilha.tipo.capitalize() if trilha.tipo else 'Geral' }}</span>
+        <h2>Progresso da trilha</h2>
+        <p>
+          Esta trilha reúne orientações essenciais para apoiar sua atuação em sala,
+          alinhamento com a coordenação e entendimento dos critérios pedagógicos.
+        </p>
+      </div>
+
+      <div class="progress-summary">
+        <span class="progress-number">{{ trilha.progresso.percentual | round(0) | int }}%</span>
+        <p>{{ trilha.progresso.tarefas_concluidas }} de {{ trilha.progresso.total_tarefas }} tarefas concluídas</p>
+      </div>
+    </section>
+
+    <section class="section-header">
+      <div>
+        <h2>Tarefas da trilha</h2>
+        <p>Conclua as etapas conforme avança em sua adaptação.</p>
+      </div>
+    </section>
+
+    <section class="task-list">
+      {% for task in trilha.tasks %}
+      <article class="card task-card {{ 'done' if task.status == 'concluido' else 'pending' }}">
+        <div>
+          {% if task.status == 'concluido' %}
+          <span class="status-pill success">Concluída</span>
+          {% else %}
+          <span class="status-pill warning">Pendente</span>
+          {% endif %}
+          <h3>{{ task.descricao }}</h3>
+          <p>
+            {{ task.material_apoio if task.material_apoio else 'Acesse a tarefa para mais detalhes.' }}
+          </p>
+        </div>
+
+        {% if task.status == 'concluido' %}
+        <a href="{{ url_for('professor.task_detail', task_id=task.id) }}" class="button secondary">Ver tarefa</a>
+        {% else %}
+        <a href="{{ url_for('professor.task_detail', task_id=task.id) }}" class="button">Abrir tarefa</a>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </section>
+
+    <section class="card feedback-callout">
+      <div>
+        <h2>Compartilhar experiência</h2>
+        <p>
+          Caso queira registrar dúvidas, dificuldades ou sugestões durante sua adaptação,
+          você pode enviar um feedback sobre o processo de onboarding.
+        </p>
+      </div>
+
+      <a href="{{ url_for('professor.feedback_form_context') }}" class="button secondary">Enviar feedback</a>
+    </section>
+  </main>
+</body>
+</html>

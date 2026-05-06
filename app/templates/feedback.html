@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Feedback do onboarding</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header class="topbar">
@@ -16,9 +16,9 @@
       </div>
 
       <nav class="topnav">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="trilha.html">Trilhas</a>
-        <a href="feedback.html" class="active">Feedback</a>
+        <a href="{{ url_for('professor.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('professor.dashboard') }}">Trilhas</a>
+        <a href="{{ url_for('professor.feedback_form_context') }}" class="active">Feedback</a>
       </nav>
     </div>
   </header>
@@ -31,16 +31,14 @@
         ingressantes e identificar possíveis melhorias no processo de onboarding.
       </p>
 
-      <form class="feedback-form">
+      <form class="feedback-form" method="POST" action="{{ url_for('professor.submit_feedback') }}">
         <div class="form-group">
-          <label for="nota">Como você avalia sua experiência até o momento?</label>
-          <select id="nota" name="nota">
-            <option value="">Selecione uma opção</option>
-            <option value="5">5 - Excelente</option>
-            <option value="4">4 - Boa</option>
-            <option value="3">3 - Regular</option>
-            <option value="2">2 - Ruim</option>
-            <option value="1">1 - Muito ruim</option>
+          <label for="trilha_id">Trilha relacionada (Opcional)</label>
+          <select id="trilha_id" name="trilha_id">
+            <option value="">Nenhuma / Geral</option>
+            {% for trilha in data.trilhas_disponiveis %}
+            <option value="{{ trilha.id }}">{{ trilha.nome }}</option>
+            {% endfor %}
           </select>
         </div>
 
@@ -71,27 +69,19 @@
         </div>
 
         <div class="form-group">
-          <label for="dificuldades">Quais dificuldades você encontrou?</label>
+          <label for="comentario">Comentário / Dificuldades / Sugestões</label>
           <textarea
-            id="dificuldades"
-            name="dificuldades"
+            id="comentario"
+            name="comentario"
             rows="4"
-            placeholder="Ex: acesso aos sistemas, falta de informações, dúvidas sobre rotinas pedagógicas..."
+            placeholder="Ex: acesso aos sistemas, falta de informações, sugestões de melhoria..."
+            required
           ></textarea>
         </div>
-
-        <div class="form-group">
-          <label for="sugestoes">Sugestões para melhorar o onboarding</label>
-          <textarea
-            id="sugestoes"
-            name="sugestoes"
-            rows="4"
-            placeholder="Escreva sugestões para tornar o processo mais claro e acolhedor."
-          ></textarea>
-        </div>
+        <!-- Removido sugestoes e checkboxes extras para adequar ao modelo Feedback atual do banco -->
 
         <div class="actions">
-          <a href="dashboard.html" class="button secondary">Cancelar</a>
+          <a href="{{ url_for('professor.dashboard') }}" class="button secondary">Cancelar</a>
           <button type="submit" class="button">Enviar feedback</button>
         </div>
       </form>

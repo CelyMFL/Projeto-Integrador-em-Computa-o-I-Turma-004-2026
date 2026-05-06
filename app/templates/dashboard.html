@@ -1,59 +1,124 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .dashboard-container {
-            background-color: #ffffff;
-            width: 100%;
-            max-width: 600px;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-            text-align: center;
-            margin: 0 auto;
-            margin-top: 50px;
-        }
-        .dashboard-container h1 {
-            color: #1e293b;
-            margin-bottom: 20px;
-        }
-        .dashboard-container p {
-            color: #64748b;
-            margin-bottom: 30px;
-        }
-        .logout-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #ef4444;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        .logout-btn:hover {
-            background-color: #dc2626;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha integração</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-    <div style="padding: 20px; width: 100%;">
-        <div class="dashboard-container">
-            <h1>Bem-vindo(a), {{ data.user.nome if data else current_user.nome }}!</h1>
-            <p>Você acessou o sistema com sucesso. Esta é a sua tela inicial provisória.</p>
-            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Sair da Plataforma</a>
-        </div>
-    </div>
-</body>
-<footer>
-    <p>Criado para a disciplina Projeto Integrador I da Universidade Virtual do Estado de São Paulo </p>
-</footer>
+  <header class="topbar">
+    <div class="topbar-content">
+      <div>
+        <span class="eyebrow">Onboarding docente</span>
+        <h1>Minha integração</h1>
+        <p>Acompanhe suas trilhas, tarefas pendentes e progresso inicial na instituição.</p>
+      </div>
 
+      <nav class="topnav">
+        <a href="{{ url_for('professor.dashboard') }}" class="active">Dashboard</a>
+        <a href="trilha.html">Trilhas</a>
+        <a href="feedback.html">Feedback</a>
+      </nav>
+
+      <div class="user-box">
+        <span>Professor(a)</span>
+        <strong>{{ data.user.nome if data else current_user.nome }}</strong>
+        <a href="{{ url_for('auth.logout') }}" style="font-size: 12px; margin-left: 10px; color: var(--color-danger); text-decoration: none;">Sair</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero-card">
+      <div>
+        <span class="tag">Em andamento</span>
+        <h2>Bem-vindo(a) à sua jornada de adaptação</h2>
+        <p>
+          Este ambiente reúne orientações institucionais, atividades pedagógicas e recursos
+          importantes para apoiar seus primeiros passos na instituição.
+        </p>
+      </div>
+
+      <div class="progress-summary">
+        <span class="progress-number">{{ data.progresso_geral.percentual | round(0) | int }}%</span>
+        <p>da jornada concluída ({{ data.progresso_geral.tarefas_concluidas }}/{{ data.progresso_geral.total_tarefas }})</p>
+      </div>
+    </section>
+
+    <section class="section-header">
+      <div>
+        <h2>Suas trilhas</h2>
+        <p>Organize sua adaptação por áreas de orientação.</p>
+      </div>
+    </section>
+
+    <section class="cards-grid">
+      {% for trilha in data.trilhas_atribuidas %}
+      <article class="card trail-card">
+        <div class="card-header">
+          <span class="tag tag-{{ 'blue' if trilha.tipo == 'pedagógica' else 'green' if trilha.tipo == 'institucional' else 'purple' }}">
+            {{ trilha.tipo.capitalize() if trilha.tipo else 'Geral' }}
+          </span>
+          {% if trilha.obrigatoria %}
+          <span class="required">Obrigatória</span>
+          {% else %}
+          <span class="optional">Opcional</span>
+          {% endif %}
+        </div>
+
+        <h3>{{ trilha.nome }}</h3>
+        <p>
+          {{ trilha.descricao }}
+        </p>
+
+        <div class="progress">
+          <div class="progress-bar" style="width: {{ trilha.progresso.percentual | round(0) | int }}%;"></div>
+        </div>
+
+        <div class="card-footer">
+          <span>{{ trilha.progresso.tarefas_concluidas }} de {{ trilha.progresso.total_tarefas }} tarefas</span>
+          <a href="{{ url_for('professor.trilha_detail', trilha_id=trilha.id) }}" class="button">Abrir trilha</a>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="card">
+        <h2>Próximas tarefas</h2>
+
+        <ul class="task-preview-list">
+          {% for tarefa in data.proximas_tarefas %}
+          <li>
+            <span class="task-dot pending"></span>
+            <div>
+              <strong>{{ tarefa.descricao }}</strong>
+              <p>Trilha {{ tarefa.trilha_id }}</p> <!-- Idealmente teríamos o nome da trilha aqui -->
+            </div>
+          </li>
+          {% else %}
+          <li>
+            <div>
+              <strong>Nenhuma tarefa pendente!</strong>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <!-- Removed generic 'Ver tarefas' button since each trilha has its own -->
+      </article>
+
+      <article class="card">
+        <h2>Feedback</h2>
+        <p>
+          Ao longo da integração, você pode compartilhar dificuldades,
+          dúvidas ou sugestões para melhorar o processo de acolhimento docente.
+        </p>
+
+        <a href="{{ url_for('professor.feedback_form_context') }}" class="button secondary">Enviar feedback</a>
+      </article>
+    </section>
+  </main>
+</body>
 </html>

@@ -155,7 +155,10 @@ def trilha_detail(trilha_id):
         ).all()
     }
 
-    return jsonify(_serialize_trilha(trilha, enrollment, completed_ids))
+    data = _serialize_trilha(trilha, enrollment, completed_ids)
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(data)
+    return render_template('trilha.html', trilha=data)
 
 
 @professor.route('/tarefas/<int:task_id>', methods=['GET'])
@@ -174,7 +177,7 @@ def task_detail(task_id):
         task_id=task_id,
     ).first()
 
-    return jsonify({
+    data = {
         'id': task.id,
         'descricao': task.descricao,
         'status': 'concluido' if completion and completion.concluido else 'pendente',
@@ -182,7 +185,12 @@ def task_detail(task_id):
         'material_apoio': task.material_apoio,
         'link_apoio': task.link_apoio,
         'documento_apoio': task.documento_apoio,
-    })
+    }
+    
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(data)
+        
+    return render_template('tarefa.html', task=data)
 
 
 @professor.route('/feedback', methods=['GET'])
@@ -192,14 +200,17 @@ def feedback_form_context():
     if current_user.role != RoleEnum.PROFESSOR:
         return jsonify({'error': 'Acesso negado'}), 403
 
-    return jsonify({
+    data = {
         'message': 'Formulário de feedback disponível',
         'campos': ['comentario', 'trilha_id (opcional)'],
         'trilhas_disponiveis': [
             {'id': item.id, 'nome': item.nome}
             for item in Checklist.query.order_by(Checklist.nome).all()
         ],
-    })
+    }
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(data)
+    return render_template('feedback.html', data=data)
 
 
 @professor.route('/feedback', methods=['POST'])
