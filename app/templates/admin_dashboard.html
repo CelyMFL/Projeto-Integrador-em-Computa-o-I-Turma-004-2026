@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Dashboard</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-content">
+            <h1>Painel Administrativo</h1>
+            <nav class="topnav">
+                <a href="admin_dashboard.html" class="active">Dashboard</a>
+                <a href="admin_professores.html">Professores</a>
+                <a href="admin_trilhas.html">Trilhas</a>
+                <a href="admin_tarefas.html">Tarefas/Feedbacks</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="section-header">
+            <div>
+                <span class="eyebrow">Visão Geral</span>
+                <h2>Métricas do Sistema</h2>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card progress-summary">
+                <span class="muted">Total Usuários</span>
+                <span class="progress-number" id="total_users">124</span>
+            </div>
+            <div class="card progress-summary">
+                <span class="muted">Total Professores</span>
+                <span class="progress-number" id="total_professores">18</span>
+            </div>
+            <div class="card progress-summary">
+                <span class="muted">Total Trilhas</span>
+                <span class="progress-number" id="total_trilhas">12</span>
+            </div>
+            <div class="card progress-summary">
+                <span class="muted">Obrigatórias</span>
+                <span class="progress-number" id="total_obrigatorias">5</span>
+            </div>
+            <div class="card progress-summary">
+                <span class="muted">Feedbacks</span>
+                <span class="progress-number" id="total_feedbacks">89</span>
+            </div>
+            <div class="card progress-summary">
+                <span class="muted">Concluídas</span>
+                <span class="progress-number" id="trilhas_concluidas">42</span>
+            </div>
+             <div class="card progress-summary">
+                <span class="muted">Em Andamento</span>
+                <span class="progress-number" id="trilhas_em_andamento">67</span>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

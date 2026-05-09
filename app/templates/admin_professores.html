@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Professores</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-content">
+            <h1>Gestão de Professores</h1>
+            <nav class="topnav">
+                <a href="admin_dashboard.html">Dashboard</a>
+                <a href="admin_professores.html" class="active">Professores</a>
+                <a href="admin_trilhas.html">Trilhas</a>
+                <a href="admin_tarefas.html">Tarefas/Feedbacks</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-grid">
+            <section>
+                <div class="section-header">
+                    <h2>Lista de Professores</h2>
+                </div>
+                <div class="task-list">
+                    <div class="card task-card done">
+                        <div>
+                            <strong>Ricardo Silva</strong>
+                            <p>ricardo.silva@email.com</p>
+                            <span class="tag">3 Trilhas Atribuídas</span>
+                        </div>
+                        <div class="user-box">
+                            <span>Andamento Geral</span>
+                            <strong>85%</strong>
+                        </div>
+                        <button class="button ghost">Editar</button>
+                    </div>
+
+                    <div class="card task-card pending">
+                        <div>
+                            <strong>Ana Paula</strong>
+                            <p>ana.paula@email.com</p>
+                            <span class="tag">1 Trilha Atribuída</span>
+                        </div>
+                        <div class="user-box">
+                            <span>Andamento Geral</span>
+                            <strong>12%</strong>
+                        </div>
+                        <button class="button ghost">Editar</button>
+                    </div>
+                </div>
+            </section>
+
+            <aside>
+                <div class="card">
+                    <h3>Novo Professor</h3>
+                    <form class="feedback-form">
+                        <div class="form-group">
+                            <label>Nome Completo</label>
+                            <input type="text" placeholder="Ex: João Silva">
+                        </div>
+                        <div class="form-group">
+                            <label>E-mail</label>
+                            <input type="email" placeholder="email@exemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Senha</label>
+                            <input type="password" placeholder="********">
+                        </div>
+                        <button type="submit" class="button">Salvar Professor</button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>
