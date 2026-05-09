@@ -19,6 +19,6 @@ class User(db.Model, UserMixin):
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.PROFESSOR)
 
     # Relationships
-    professor_trilhas = db.relationship('ProfessorTrilha', backref='professor_user', lazy=True)
-    professor_checklists = db.relationship('ProfessorChecklist', backref='professor_user', lazy=True)
-    feedbacks = db.relationship('Feedback', backref='professor_user', lazy=True)
+    professor_trilhas = db.relationship('ProfessorTrilha', back_populates='professor', lazy=True)
+    professor_checklists = db.relationship('ProfessorChecklist', back_populates='professor', lazy=True)
+    feedbacks = db.relationship('Feedback', back_populates='professor', lazy=True)

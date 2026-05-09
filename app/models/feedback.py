@@ -14,5 +14,5 @@ class Feedback(db.Model):
     data_envio = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    professor = relationship('User', foreign_keys=[professor_id])
+    professor = relationship('User', foreign_keys=[professor_id], back_populates='feedbacks')
     trilha = relationship('Checklist', foreign_keys=[trilha_id])

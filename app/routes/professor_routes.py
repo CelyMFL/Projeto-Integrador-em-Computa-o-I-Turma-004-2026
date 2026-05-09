@@ -1,6 +1,6 @@
-"""Professor-focused endpoints that map directly to front-end screens."""
+"""Rotas voltadas ao perfil Professor, mapeadas diretamente para as telas do frontend."""
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from flask_login import login_required, current_user
 from app.models import RoleEnum, Checklist, Task, ProfessorTrilha, StatusEnum, ProfessorChecklist
 from app.services.feedback_service import FeedbackService
@@ -10,7 +10,7 @@ professor = Blueprint('professor', __name__)
 
 
 def _payload():
-    # Accept both JSON and form-data so web and API clients share the same endpoint.
+    """Aceita tanto JSON quanto form-data para que clientes web e APIs compartilhem o mesmo endpoint."""
     data = request.get_json(silent=True)
     if data is None:
         data = request.form.to_dict()
@@ -18,6 +18,7 @@ def _payload():
 
 
 def _serialize_task(task, completed_ids=None):
+    """Serializa os dados de uma tarefa individual, identificando se foi concluída."""
     completed_ids = completed_ids or set()
     return {
         'id': task.id,
@@ -31,8 +32,9 @@ def _serialize_task(task, completed_ids=None):
 
 
 def _serialize_trilha(trilha, enrollment=None, completed_ids=None):
+    """Serializa uma trilha completa e seu progresso baseado nas tarefas do professor."""
     completed_ids = completed_ids or set()
-    # Keep task ordering deterministic for the front-end timeline rendering.
+    # Mantém a ordem das tarefas determinística para a renderização da timeline no frontend.
     tasks = sorted(trilha.tasks, key=lambda item: item.ordem)
     completed_tasks = sum(1 for task in tasks if task.id in completed_ids)
     total_tasks = len(tasks)
@@ -57,7 +59,7 @@ def _serialize_trilha(trilha, enrollment=None, completed_ids=None):
 @professor.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    """Tela: Dashboard / Minha integração."""
+    """Renderiza a tela de Dashboard / Minha integração do professor."""
     if current_user.role != RoleEnum.PROFESSOR:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -89,7 +91,7 @@ def dashboard():
         key=lambda item: (item.checklist_id, item.ordem),
     )
 
-    return jsonify({
+    data = {
         'user': {
             'id': current_user.id,
             'nome': current_user.nome,
@@ -121,13 +123,18 @@ def dashboard():
             for trilha in trilhas
             if trilha.obrigatoria
         ],
-    })
+    }
+
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(data)
+        
+    return render_template('dashboard.html', data=data)
 
 
 @professor.route('/trilhas/<int:trilha_id>', methods=['GET'])
 @login_required
 def trilha_detail(trilha_id):
-    """Tela: Trilha."""
+    """Exibe os detalhes e o progresso de uma Trilha específica."""
     if current_user.role != RoleEnum.PROFESSOR:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -148,13 +155,16 @@ def trilha_detail(trilha_id):
         ).all()
     }
 
-    return jsonify(_serialize_trilha(trilha, enrollment, completed_ids))
+    data = _serialize_trilha(trilha, enrollment, completed_ids)
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(data)
+    return render_template('trilha.html', trilha=data)
 
 
 @professor.route('/tarefas/<int:task_id>', methods=['GET'])
 @login_required
 def task_detail(task_id):
-    """Tela: Tarefa."""
+    """Recupera os detalhes e status de uma Tarefa específica."""
     if current_user.role != RoleEnum.PROFESSOR:
         return jsonify({'error': 'Acesso negado'}), 403
 
@@ -167,7 +177,7 @@ def task_detail(task_id):
         task_id=task_id,
     ).first()
 
-    return jsonify({
+    data = {
         'id': task.id,
         'descricao': task.descricao,
         'status': 'concluido' if completion and completion.concluido else 'pendente',
@@ -175,30 +185,38 @@ def task_detail(task_id):
         'material_apoio': task.material_apoio,
         'link_apoio': task.link_apoio,
         'documento_apoio': task.documento_apoio,
-    })
+    }
+    
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(data)
+        
+    return render_template('tarefa.html', task=data)
 
 
 @professor.route('/feedback', methods=['GET'])
 @login_required
 def feedback_form_context():
-    """Tela: Feedback (dados para formulário)."""
+    """Retorna os dados necessários para popular o formulário de envio de Feedback."""
     if current_user.role != RoleEnum.PROFESSOR:
         return jsonify({'error': 'Acesso negado'}), 403
 
-    return jsonify({
+    data = {
         'message': 'Formulário de feedback disponível',
         'campos': ['comentario', 'trilha_id (opcional)'],
         'trilhas_disponiveis': [
             {'id': item.id, 'nome': item.nome}
             for item in Checklist.query.order_by(Checklist.nome).all()
         ],
-    })
+    }
+    if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+        return jsonify(data)
+    return render_template('feedback.html', data=data)
 
 
 @professor.route('/feedback', methods=['POST'])
 @login_required
 def submit_feedback():
-    """Tela: Feedback (envio)."""
+    """Recebe e salva um novo feedback submetido pelo professor."""
     if current_user.role != RoleEnum.PROFESSOR:
         return jsonify({'error': 'Acesso negado'}), 403
 

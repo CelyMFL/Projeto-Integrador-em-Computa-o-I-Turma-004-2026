@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Tarefas e Feedbacks</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-content">
+            <h1>Conteúdo e Feedbacks</h1>
+            <nav class="topnav">
+                <a href="admin_dashboard.html">Dashboard</a>
+                <a href="admin_professores.html">Professores</a>
+                <a href="admin_trilhas.html">Trilhas</a>
+                <a href="admin_tarefas.html" class="active">Tarefas/Feedbacks</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-grid">
+            <section>
+                <div class="card">
+                    <div class="section-header">
+                        <h3>Tarefas por Trilha</h3>
+                        <select style="width: auto;">
+                            <option>Selecione uma Trilha</option>
+                            <option>Comunicação Assertiva</option>
+                            <option>Introdução ao Azure</option>
+                        </select>
+                    </div>
+                    
+                    <ul class="task-preview-list">
+                        <li>
+                            <div class="task-dot pending"></div>
+                            <div style="flex: 1;">
+                                <strong>Módulo 1: Teoria das Cores</strong>
+                                <p>Leitura técnica e quiz inicial.</p>
+                            </div>
+                            <div class="actions">
+                                <button class="button ghost">Reordenar</button>
+                                <button class="button ghost">Edit</button>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="task-dot pending"></div>
+                            <div style="flex: 1;">
+                                <strong>Módulo 2: Prática em Illustrator</strong>
+                                <p>Exercício de vetorização de logo.</p>
+                            </div>
+                            <div class="actions">
+                                <button class="button ghost">Reordenar</button>
+                                <button class="button ghost">Edit</button>
+                            </div>
+                        </li>
+                    </ul>
+                    <button class="button" style="width: 100%;">+ Adicionar Tarefa</button>
+                </div>
+            </section>
+
+            <aside>
+                <h3>Feedbacks Recebidos</h3>
+                <div class="info-box">
+                    <span class="status-pill success">Excelente</span>
+                    <p style="margin-top: 10px;">"A trilha de Azure me ajudou muito a entender a migração de servidoreslegados."</p>
+                    <span class="muted" style="font-size: 12px;">— Enviado por Prof. Ricardo S.</span>
+                </div>
+
+                <div class="info-box" style="border-left-color: var(--warning);">
+                    <span class="status-pill warning">Sugestão</span>
+                    <p style="margin-top: 10px;">"O Módulo 2 está com o link do vídeo quebrado."</p>
+                    <span class="muted" style="font-size: 12px;">— Enviado por Prof. Ana P.</span>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

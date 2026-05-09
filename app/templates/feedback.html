@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback do onboarding</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-content">
+      <div>
+        <span class="eyebrow">Feedback</span>
+        <h1>Feedback do onboarding</h1>
+        <p>Compartilhe sua percepção sobre o processo de adaptação docente.</p>
+      </div>
+
+      <nav class="topnav">
+        <a href="{{ url_for('professor.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('professor.dashboard') }}">Trilhas</a>
+        <a href="{{ url_for('professor.feedback_form_context') }}" class="active">Feedback</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container narrow">
+    <section class="card">
+      <h2>Como está sendo sua integração?</h2>
+      <p>
+        Suas respostas ajudam a instituição a acompanhar melhor a experiência dos professores
+        ingressantes e identificar possíveis melhorias no processo de onboarding.
+      </p>
+
+      <form class="feedback-form" method="POST" action="{{ url_for('professor.submit_feedback') }}">
+        <div class="form-group">
+          <label for="trilha_id">Trilha relacionada (Opcional)</label>
+          <select id="trilha_id" name="trilha_id">
+            <option value="">Nenhuma / Geral</option>
+            {% for trilha in data.trilhas_disponiveis %}
+            <option value="{{ trilha.id }}">{{ trilha.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Quais pontos mais ajudaram na sua adaptação?</label>
+
+          <div class="checkbox-grid">
+            <label>
+              <input type="checkbox" name="pontos_positivos">
+              Clareza das tarefas
+            </label>
+
+            <label>
+              <input type="checkbox" name="pontos_positivos">
+              Materiais disponíveis
+            </label>
+
+            <label>
+              <input type="checkbox" name="pontos_positivos">
+              Apoio da coordenação
+            </label>
+
+            <label>
+              <input type="checkbox" name="pontos_positivos">
+              Organização das trilhas
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="comentario">Comentário / Dificuldades / Sugestões</label>
+          <textarea
+            id="comentario"
+            name="comentario"
+            rows="4"
+            placeholder="Ex: acesso aos sistemas, falta de informações, sugestões de melhoria..."
+            required
+          ></textarea>
+        </div>
+        <!-- Removido sugestoes e checkboxes extras para adequar ao modelo Feedback atual do banco -->
+
+        <div class="actions">
+          <a href="{{ url_for('professor.dashboard') }}" class="button secondary">Cancelar</a>
+          <button type="submit" class="button">Enviar feedback</button>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

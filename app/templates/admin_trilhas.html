@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Trilhas</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-content">
+            <h1>Gestão de Trilhas</h1>
+            <nav class="topnav">
+                <a href="admin_dashboard.html">Dashboard</a>
+                <a href="admin_professores.html">Professores</a>
+                <a href="admin_trilhas.html" class="active">Trilhas</a>
+                <a href="admin_tarefas.html">Tarefas/Feedbacks</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="section-header">
+            <h2>Trilhas Ativas</h2>
+            <button class="button">+ Criar Nova Trilha</button>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card trail-card">
+                <div class="card-header">
+                    <span class="required">Obrigatória</span>
+                    <span class="tag">Soft Skills</span>
+                </div>
+                <h3>Comunicação Assertiva</h3>
+                <p>Desenvolvimento de habilidades interpessoais para líderes.</p>
+                <div class="card-footer">
+                    <span>12 Tarefas</span>
+                    <div class="actions">
+                        <a href="#" class="button ghost">Editar</a>
+                        <a href="#" class="button ghost" style="border-color: #fee2e2; color: #b91c1c;">Excluir</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card trail-card">
+                <div class="card-header">
+                    <span class="optional">Opcional</span>
+                    <span class="tag">Técnica</span>
+                </div>
+                <h3>Introdução ao Azure</h3>
+                <p>Fundamentos de nuvem e arquitetura de microsserviços.</p>
+                <div class="card-footer">
+                    <span>8 Tarefas</span>
+                    <div class="actions">
+                        <a href="#" class="button ghost">Editar</a>
+                        <a href="#" class="button ghost" style="border-color: #fee2e2; color: #b91c1c;">Excluir</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

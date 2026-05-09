@@ -22,5 +22,5 @@ class ProfessorTrilha(db.Model):
     data_conclusao = Column(DateTime, nullable=True)
     
     # Relationships
-    professor = relationship('User', foreign_keys=[professor_id])
+    professor = relationship('User', foreign_keys=[professor_id], back_populates='professor_trilhas')
     trilha = relationship('Checklist', foreign_keys=[trilha_id])
