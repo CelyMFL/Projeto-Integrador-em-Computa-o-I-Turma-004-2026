@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Dashboard</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header class="topbar">
         <div class="topbar-content">
             <h1>Painel Administrativo</h1>
             <nav class="topnav">
-                <a href="admin_dashboard.html" class="active">Dashboard</a>
-                <a href="admin_professores.html">Professores</a>
-                <a href="admin_trilhas.html">Trilhas</a>
-                <a href="admin_tarefas.html">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('admin.home') }}" class="active">Dashboard</a>
+                <a href="{{ url_for('admin.professores') }}">Professores</a>
+                <a href="{{ url_for('admin.trilhas_management') }}">Trilhas</a>
+                <a href="{{ url_for('admin.tasks_feedbacks_management') }}">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('auth.logout') }}" style="color: #ef4444; margin-left: 20px;">Sair</a>
             </nav>
         </div>
     </header>
@@ -30,31 +31,31 @@
         <div class="cards-grid">
             <div class="card progress-summary">
                 <span class="muted">Total Usuários</span>
-                <span class="progress-number" id="total_users">124</span>
+                <span class="progress-number" id="total_users">{{ metrics.total_users }}</span>
             </div>
             <div class="card progress-summary">
                 <span class="muted">Total Professores</span>
-                <span class="progress-number" id="total_professores">18</span>
+                <span class="progress-number" id="total_professores">{{ metrics.total_professores }}</span>
             </div>
             <div class="card progress-summary">
                 <span class="muted">Total Trilhas</span>
-                <span class="progress-number" id="total_trilhas">12</span>
+                <span class="progress-number" id="total_trilhas">{{ metrics.total_trilhas }}</span>
             </div>
             <div class="card progress-summary">
                 <span class="muted">Obrigatórias</span>
-                <span class="progress-number" id="total_obrigatorias">5</span>
+                <span class="progress-number" id="total_obrigatorias">{{ metrics.total_obrigatorias }}</span>
             </div>
             <div class="card progress-summary">
                 <span class="muted">Feedbacks</span>
-                <span class="progress-number" id="total_feedbacks">89</span>
+                <span class="progress-number" id="total_feedbacks">{{ metrics.total_feedbacks }}</span>
             </div>
             <div class="card progress-summary">
                 <span class="muted">Concluídas</span>
-                <span class="progress-number" id="trilhas_concluidas">42</span>
+                <span class="progress-number" id="trilhas_concluidas">{{ metrics.trilhas_concluidas }}</span>
             </div>
              <div class="card progress-summary">
                 <span class="muted">Em Andamento</span>
-                <span class="progress-number" id="trilhas_em_andamento">67</span>
+                <span class="progress-number" id="trilhas_em_andamento">{{ metrics.trilhas_em_andamento }}</span>
             </div>
         </div>
     </main>

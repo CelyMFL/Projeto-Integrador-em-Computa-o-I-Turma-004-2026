@@ -1,6 +1,6 @@
 """Rotas do administrador para telas de gestão e dashboard."""
 
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from flask_login import login_required, current_user
 from app.models.user import RoleEnum
 from app.models.user import User
@@ -53,7 +53,7 @@ def home():
     if current_user.role != RoleEnum.ADMIN:
         return "Acesso negado", 403
 
-    return render_template('admin.html', user=current_user, metrics=build_dashboard_metrics())
+    return render_template('admin_dashboard.html', user=current_user, metrics=build_dashboard_metrics())
 
 
 @admin.route('/analytics')
@@ -114,7 +114,7 @@ def professores():
             },
         })
 
-    return jsonify(payload)
+    return render_template('admin_professores.html', user=current_user, professores=payload)
 
 
 @admin.route('/professores', methods=['POST'])
@@ -138,6 +138,9 @@ def create_professor():
     user = User(nome=nome, email=email, senha=generate_password_hash(senha), role=RoleEnum.PROFESSOR)
     db.session.add(user)
     db.session.commit()
+
+    if request.accept_mimetypes.accept_html and not request.accept_mimetypes.accept_json:
+        return redirect(url_for('admin.professores'))
 
     return jsonify({'id': user.id, 'nome': user.nome, 'email': user.email, 'role': user.role.value}), 201
 
@@ -184,7 +187,7 @@ def trilhas_management():
         return jsonify({'error': 'Acesso negado'}), 403
 
     trilhas = Checklist.query.order_by(Checklist.nome).all()
-    return jsonify([
+    trilhas_data = [
         {
             'id': trilha.id,
             'nome': trilha.nome,
@@ -194,7 +197,8 @@ def trilhas_management():
             'total_tarefas': len(trilha.tasks),
         }
         for trilha in trilhas
-    ])
+    ]
+    return render_template('admin_trilhas.html', user=current_user, trilhas=trilhas_data)
 
 
 @admin.route('/tarefas-feedbacks', methods=['GET'])
@@ -208,7 +212,7 @@ def tasks_feedbacks_management():
     trilhas = Checklist.query.order_by(Checklist.nome).all()
     feedbacks = Feedback.query.order_by(Feedback.data_envio.desc()).all()
 
-    return jsonify({
+    data = {
         'tarefas_por_trilha': [
             {
                 'trilha_id': trilha.id,
@@ -234,7 +238,9 @@ def tasks_feedbacks_management():
                 'trilha_id': item.trilha_id,
                 'comentario': item.comentario,
                 'data_envio': item.data_envio.isoformat() if item.data_envio else None,
+                'professor_nome': User.query.get(item.professor_id).nome if item.professor_id else "Desconhecido"
             }
             for item in feedbacks
         ],
-    })
+    }
+    return render_template('admin_tarefas.html', user=current_user, **data)

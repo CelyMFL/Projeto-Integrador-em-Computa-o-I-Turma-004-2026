@@ -17,8 +17,8 @@
 
       <nav class="topnav">
         <a href="{{ url_for('professor.dashboard') }}" class="active">Dashboard</a>
-        <a href="trilha.html">Trilhas</a>
-        <a href="feedback.html">Feedback</a>
+        <a href="{{ url_for('professor.dashboard') }}">Trilhas</a> <!-- Redireciona para o dashboard que lista trilhas -->
+        <a href="{{ url_for('professor.feedback_form_context') }}">Feedback</a>
       </nav>
 
       <div class="user-box">

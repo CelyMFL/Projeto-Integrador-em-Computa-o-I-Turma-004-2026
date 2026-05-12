@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Trilhas</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header class="topbar">
         <div class="topbar-content">
             <h1>Gestão de Trilhas</h1>
             <nav class="topnav">
-                <a href="admin_dashboard.html">Dashboard</a>
-                <a href="admin_professores.html">Professores</a>
-                <a href="admin_trilhas.html" class="active">Trilhas</a>
-                <a href="admin_tarefas.html">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('admin.home') }}">Dashboard</a>
+                <a href="{{ url_for('admin.professores') }}">Professores</a>
+                <a href="{{ url_for('admin.trilhas_management') }}" class="active">Trilhas</a>
+                <a href="{{ url_for('admin.tasks_feedbacks_management') }}">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('auth.logout') }}" style="color: #ef4444; margin-left: 20px;">Sair</a>
             </nav>
         </div>
     </header>
@@ -26,38 +27,49 @@
         </div>
 
         <div class="cards-grid">
+            {% for trilha in trilhas %}
             <div class="card trail-card">
                 <div class="card-header">
+                    {% if trilha.obrigatoria %}
                     <span class="required">Obrigatória</span>
-                    <span class="tag">Soft Skills</span>
-                </div>
-                <h3>Comunicação Assertiva</h3>
-                <p>Desenvolvimento de habilidades interpessoais para líderes.</p>
-                <div class="card-footer">
-                    <span>12 Tarefas</span>
-                    <div class="actions">
-                        <a href="#" class="button ghost">Editar</a>
-                        <a href="#" class="button ghost" style="border-color: #fee2e2; color: #b91c1c;">Excluir</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card trail-card">
-                <div class="card-header">
+                    {% else %}
                     <span class="optional">Opcional</span>
-                    <span class="tag">Técnica</span>
+                    {% endif %}
+                    {% if trilha.tipo %}
+                    <span class="tag">{{ trilha.tipo }}</span>
+                    {% endif %}
                 </div>
-                <h3>Introdução ao Azure</h3>
-                <p>Fundamentos de nuvem e arquitetura de microsserviços.</p>
+                <h3>{{ trilha.nome }}</h3>
+                <p>{{ trilha.descricao }}</p>
                 <div class="card-footer">
-                    <span>8 Tarefas</span>
+                    <span>{{ trilha.total_tarefas }} Tarefas</span>
                     <div class="actions">
                         <a href="#" class="button ghost">Editar</a>
-                        <a href="#" class="button ghost" style="border-color: #fee2e2; color: #b91c1c;">Excluir</a>
+                        <button onclick="deleteTrilha({{ trilha.id }})" class="button ghost" style="border-color: #fee2e2; color: #b91c1c;">Excluir</button>
                     </div>
                 </div>
             </div>
+            {% endfor %}
+            {% if not trilhas %}
+            <p class="muted">Nenhuma trilha encontrada.</p>
+            {% endif %}
         </div>
     </main>
+
+    <script>
+        function deleteTrilha(id) {
+            if (confirm('Tem certeza que deseja excluir esta trilha?')) {
+                fetch('/trilhas/' + id, {
+                    method: 'DELETE',
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erro ao excluir trilha.');
+                    }
+                });
+            }
+        }
+    </script>
 </body>
 </html>

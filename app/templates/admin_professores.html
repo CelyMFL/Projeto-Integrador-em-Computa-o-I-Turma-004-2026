@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Professores</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header class="topbar">
         <div class="topbar-content">
             <h1>Gestão de Professores</h1>
             <nav class="topnav">
-                <a href="admin_dashboard.html">Dashboard</a>
-                <a href="admin_professores.html" class="active">Professores</a>
-                <a href="admin_trilhas.html">Trilhas</a>
-                <a href="admin_tarefas.html">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('admin.home') }}">Dashboard</a>
+                <a href="{{ url_for('admin.professores') }}" class="active">Professores</a>
+                <a href="{{ url_for('admin.trilhas_management') }}">Trilhas</a>
+                <a href="{{ url_for('admin.tasks_feedbacks_management') }}">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('auth.logout') }}" style="color: #ef4444; margin-left: 20px;">Sair</a>
             </nav>
         </div>
     </header>
@@ -26,49 +27,41 @@
                     <h2>Lista de Professores</h2>
                 </div>
                 <div class="task-list">
-                    <div class="card task-card done">
+                    {% for prof in professores %}
+                    <div class="card task-card {{ 'done' if prof.andamento.percentual == 100 else 'pending' }}">
                         <div>
-                            <strong>Ricardo Silva</strong>
-                            <p>ricardo.silva@email.com</p>
-                            <span class="tag">3 Trilhas Atribuídas</span>
+                            <strong>{{ prof.nome }}</strong>
+                            <p>{{ prof.email }}</p>
+                            <span class="tag">{{ prof.trilhas_atribuidas|length }} Trilhas Atribuídas</span>
                         </div>
                         <div class="user-box">
                             <span>Andamento Geral</span>
-                            <strong>85%</strong>
+                            <strong>{{ prof.andamento.percentual|int }}%</strong>
                         </div>
                         <button class="button ghost">Editar</button>
                     </div>
-
-                    <div class="card task-card pending">
-                        <div>
-                            <strong>Ana Paula</strong>
-                            <p>ana.paula@email.com</p>
-                            <span class="tag">1 Trilha Atribuída</span>
-                        </div>
-                        <div class="user-box">
-                            <span>Andamento Geral</span>
-                            <strong>12%</strong>
-                        </div>
-                        <button class="button ghost">Editar</button>
-                    </div>
+                    {% endfor %}
+                    {% if not professores %}
+                    <p class="muted">Nenhum professor cadastrado ainda.</p>
+                    {% endif %}
                 </div>
             </section>
 
             <aside>
                 <div class="card">
                     <h3>Novo Professor</h3>
-                    <form class="feedback-form">
+                    <form class="feedback-form" action="{{ url_for('admin.create_professor') }}" method="POST">
                         <div class="form-group">
-                            <label>Nome Completo</label>
-                            <input type="text" placeholder="Ex: João Silva">
+                            <label for="nome">Nome Completo</label>
+                            <input type="text" id="nome" name="nome" placeholder="Ex: João Silva" required>
                         </div>
                         <div class="form-group">
-                            <label>E-mail</label>
-                            <input type="email" placeholder="email@exemplo.com">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="email@exemplo.com" required>
                         </div>
                         <div class="form-group">
-                            <label>Senha</label>
-                            <input type="password" placeholder="********">
+                            <label for="senha">Senha</label>
+                            <input type="password" id="senha" name="senha" placeholder="********" required>
                         </div>
                         <button type="submit" class="button">Salvar Professor</button>
                     </form>

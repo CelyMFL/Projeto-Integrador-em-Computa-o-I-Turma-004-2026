@@ -4,17 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Tarefas e Feedbacks</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .trilha-tasks { display: none; }
+        .trilha-tasks.active { display: block; }
+    </style>
 </head>
 <body>
     <header class="topbar">
         <div class="topbar-content">
             <h1>Conteúdo e Feedbacks</h1>
             <nav class="topnav">
-                <a href="admin_dashboard.html">Dashboard</a>
-                <a href="admin_professores.html">Professores</a>
-                <a href="admin_trilhas.html">Trilhas</a>
-                <a href="admin_tarefas.html" class="active">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('admin.home') }}">Dashboard</a>
+                <a href="{{ url_for('admin.professores') }}">Professores</a>
+                <a href="{{ url_for('admin.trilhas_management') }}">Trilhas</a>
+                <a href="{{ url_for('admin.tasks_feedbacks_management') }}" class="active">Tarefas/Feedbacks</a>
+                <a href="{{ url_for('auth.logout') }}" style="color: #ef4444; margin-left: 20px;">Sair</a>
             </nav>
         </div>
     </header>
@@ -25,56 +30,66 @@
                 <div class="card">
                     <div class="section-header">
                         <h3>Tarefas por Trilha</h3>
-                        <select style="width: auto;">
-                            <option>Selecione uma Trilha</option>
-                            <option>Comunicação Assertiva</option>
-                            <option>Introdução ao Azure</option>
+                        <select id="trilha-selector" style="width: auto;">
+                            <option value="">Selecione uma Trilha</option>
+                            {% for item in tarefas_por_trilha %}
+                            <option value="{{ item.trilha_id }}">{{ item.trilha_nome }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     
-                    <ul class="task-preview-list">
-                        <li>
-                            <div class="task-dot pending"></div>
-                            <div style="flex: 1;">
-                                <strong>Módulo 1: Teoria das Cores</strong>
-                                <p>Leitura técnica e quiz inicial.</p>
-                            </div>
-                            <div class="actions">
-                                <button class="button ghost">Reordenar</button>
-                                <button class="button ghost">Edit</button>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="task-dot pending"></div>
-                            <div style="flex: 1;">
-                                <strong>Módulo 2: Prática em Illustrator</strong>
-                                <p>Exercício de vetorização de logo.</p>
-                            </div>
-                            <div class="actions">
-                                <button class="button ghost">Reordenar</button>
-                                <button class="button ghost">Edit</button>
-                            </div>
-                        </li>
-                    </ul>
+                    <div id="tasks-container">
+                        {% for item in tarefas_por_trilha %}
+                        <div id="trilha-{{ item.trilha_id }}" class="trilha-tasks">
+                            <ul class="task-preview-list">
+                                {% for task in item.tarefas %}
+                                <li>
+                                    <div class="task-dot done"></div>
+                                    <div style="flex: 1;">
+                                        <strong>{{ task.descricao }}</strong>
+                                        <p>Ordem: {{ task.ordem }}</p>
+                                    </div>
+                                    <div class="actions">
+                                        <button class="button ghost">Edit</button>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                                {% if not item.tarefas %}
+                                <li class="muted">Nenhuma tarefa cadastrada para esta trilha.</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endfor %}
+                    </div>
                     <button class="button" style="width: 100%;">+ Adicionar Tarefa</button>
                 </div>
             </section>
 
             <aside>
                 <h3>Feedbacks Recebidos</h3>
+                {% for feed in feedbacks %}
                 <div class="info-box">
-                    <span class="status-pill success">Excelente</span>
-                    <p style="margin-top: 10px;">"A trilha de Azure me ajudou muito a entender a migração de servidoreslegados."</p>
-                    <span class="muted" style="font-size: 12px;">— Enviado por Prof. Ricardo S.</span>
+                    <span class="status-pill success">Feedback</span>
+                    <p style="margin-top: 10px;">"{{ feed.comentario }}"</p>
+                    <span class="muted" style="font-size: 12px;">— Enviado por {{ feed.professor_nome }} em {{ feed.data_envio }}</span>
                 </div>
-
-                <div class="info-box" style="border-left-color: var(--warning);">
-                    <span class="status-pill warning">Sugestão</span>
-                    <p style="margin-top: 10px;">"O Módulo 2 está com o link do vídeo quebrado."</p>
-                    <span class="muted" style="font-size: 12px;">— Enviado por Prof. Ana P.</span>
-                </div>
+                {% endfor %}
+                {% if not feedbacks %}
+                <p class="muted">Nenhum feedback recebido ainda.</p>
+                {% endif %}
             </aside>
         </div>
     </main>
+
+    <script>
+        document.getElementById('trilha-selector').addEventListener('change', function() {
+            const selectedId = this.value;
+            document.querySelectorAll('.trilha-tasks').forEach(el => el.classList.remove('active'));
+            if (selectedId) {
+                const target = document.getElementById('trilha-' + selectedId);
+                if (target) target.classList.add('active');
+            }
+        });
+    </script>
 </body>
 </html>
