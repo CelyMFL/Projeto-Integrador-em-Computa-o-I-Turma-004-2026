@@ -6,14 +6,28 @@ from app.models.professor_trilha import ProfessorTrilha, StatusEnum
 from app.models.professor_checklist import ProfessorChecklist
 from app.models.feedback import Feedback
 from werkzeug.security import generate_password_hash
+from sqlalchemy import text
 from datetime import datetime
 
 app = create_app()
 
 with app.app_context():
     # Remover dados existentes
-    db.drop_all()
-    db.create_all()
+    try:
+        engine_name = db.engine.dialect.name
+    except Exception:
+        engine_name = None
+
+    if engine_name == 'mysql':
+        with db.engine.begin() as conn:
+            conn.execute(text('SET FOREIGN_KEY_CHECKS=0;'))
+            conn.execute(text('DROP TABLE IF EXISTS user_tasks;'))
+            db.metadata.drop_all(bind=conn)
+            db.metadata.create_all(bind=conn)
+            conn.execute(text('SET FOREIGN_KEY_CHECKS=1;'))
+    else:
+        db.drop_all()
+        db.create_all()
 
     print("Iniciando a criação de dados...")
 
@@ -156,4 +170,4 @@ with app.app_context():
     db.session.commit()
 
     print("Banco de dados populado com sucesso!")
-
+

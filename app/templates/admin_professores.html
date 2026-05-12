@@ -38,7 +38,25 @@
                             <span>Andamento Geral</span>
                             <strong>{{ prof.andamento.percentual|int }}%</strong>
                         </div>
-                        <button class="button ghost">Editar</button>
+                        <button type="button" class="button ghost" onclick="toggleProfessorEdit({{ prof.id }})">Editar</button>
+                    </div>
+                    <div id="prof-edit-{{ prof.id }}" class="card" style="display:none; margin-bottom:12px;">
+                        <div class="form-group">
+                            <label for="prof-nome-{{ prof.id }}">Nome</label>
+                            <input type="text" id="prof-nome-{{ prof.id }}" value="{{ prof.nome }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="prof-email-{{ prof.id }}">E-mail</label>
+                            <input type="email" id="prof-email-{{ prof.id }}" value="{{ prof.email }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="prof-senha-{{ prof.id }}">Senha nova</label>
+                            <input type="password" id="prof-senha-{{ prof.id }}" placeholder="Deixe vazio para manter">
+                        </div>
+                        <div class="actions">
+                            <button type="button" class="button" onclick="submitProfessorEdit({{ prof.id }})">Salvar</button>
+                            <button type="button" class="button secondary" onclick="toggleProfessorEdit({{ prof.id }})">Cancelar</button>
+                        </div>
                     </div>
                     {% endfor %}
                     {% if not professores %}
@@ -69,5 +87,31 @@
             </aside>
         </div>
     </main>
+    <script>
+        function toggleProfessorEdit(id) {
+            const box = document.getElementById('prof-edit-' + id);
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function submitProfessorEdit(id) {
+            const nome = document.getElementById('prof-nome-' + id).value.trim();
+            const email = document.getElementById('prof-email-' + id).value.trim();
+            const senha = document.getElementById('prof-senha-' + id).value;
+            const payload = { nome: nome, email: email };
+            if (senha) payload.senha = senha;
+
+            fetch('/admin/professores/' + id, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(async res => {
+                if (res.ok) window.location.reload();
+                else {
+                    const body = await res.json().catch(()=>({}));
+                    alert('Erro ao atualizar professor: ' + (body.error || res.status));
+                }
+            });
+        }
+    </script>
 </body>
 </html>

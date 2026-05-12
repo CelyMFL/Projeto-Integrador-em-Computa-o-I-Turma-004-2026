@@ -36,6 +36,34 @@
                             <option value="{{ item.trilha_id }}">{{ item.trilha_nome }}</option>
                             {% endfor %}
                         </select>
+                        <button id="open-add-task" class="button">+ Adicionar Tarefa</button>
+                    </div>
+
+                    <div id="add-task-form" class="card" style="display:none; margin-bottom:16px;">
+                        <div class="form-group">
+                            <label for="task-descricao">Descrição</label>
+                            <input id="task-descricao" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label for="task-ordem">Ordem</label>
+                            <input id="task-ordem" type="number" min="1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="task-material">Material de apoio</label>
+                            <input id="task-material" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label for="task-link">Link de apoio</label>
+                            <input id="task-link" type="url" />
+                        </div>
+                        <div class="form-group">
+                            <label for="task-documento">Documento de apoio</label>
+                            <input id="task-documento" type="text" />
+                        </div>
+                        <div class="actions">
+                            <button type="button" class="button" id="submit-add-task">Salvar</button>
+                            <button type="button" class="button secondary" id="cancel-add-task">Cancelar</button>
+                        </div>
                     </div>
                     
                     <div id="tasks-container">
@@ -61,7 +89,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                    <button class="button" style="width: 100%;">+ Adicionar Tarefa</button>
+                    <button class="button" style="width: 100%;" id="open-add-task-bottom">+ Adicionar Tarefa</button>
                 </div>
             </section>
 
@@ -90,6 +118,43 @@
                 if (target) target.classList.add('active');
             }
         });
+
+        function toggleAddTaskForm() {
+            const form = document.getElementById('add-task-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function submitAddTaskForm() {
+            const trilhaId = document.getElementById('trilha-selector').value;
+            if (!trilhaId) { alert('Selecione uma trilha primeiro'); return; }
+
+            const descricao = document.getElementById('task-descricao').value.trim();
+            if (!descricao) { alert('Informe a descrição'); return; }
+
+            const payload = { descricao: descricao };
+            const ordem = document.getElementById('task-ordem').value;
+            const material = document.getElementById('task-material').value.trim();
+            const link = document.getElementById('task-link').value.trim();
+            const documento = document.getElementById('task-documento').value.trim();
+            if (ordem) payload.ordem = ordem;
+            if (material) payload.material_apoio = material;
+            if (link) payload.link_apoio = link;
+            if (documento) payload.documento_apoio = documento;
+
+            fetch('/trilhas/' + trilhaId + '/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(async res => {
+                if (res.ok) window.location.reload();
+                else { const body = await res.json().catch(()=>({})); alert('Erro ao criar tarefa: ' + (body.error || res.status)); }
+            });
+        }
+
+        document.getElementById('open-add-task').addEventListener('click', toggleAddTaskForm);
+        document.getElementById('open-add-task-bottom').addEventListener('click', toggleAddTaskForm);
+        document.getElementById('submit-add-task').addEventListener('click', submitAddTaskForm);
+        document.getElementById('cancel-add-task').addEventListener('click', toggleAddTaskForm);
     </script>
 </body>
 </html>
