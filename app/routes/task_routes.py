@@ -1,6 +1,6 @@
 """Task completion routes used by professors and admins."""
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, redirect, url_for
 from flask_login import login_required, current_user
 from app.models.user import RoleEnum
 from app.services.task_service import TaskService
@@ -41,6 +41,8 @@ def complete_task(task_id):
 
     try:
         completion = ProfessorChecklistService.mark_task_complete(current_user.id, task_id)
+        if request.accept_mimetypes.accept_html and not request.accept_mimetypes.accept_json:
+            return redirect(url_for('professor.task_detail', task_id=task_id))
         return jsonify({
             'message': 'Tarefa concluída com sucesso',
             'task_id': completion.task_id,
@@ -59,6 +61,8 @@ def incomplete_task(task_id):
 
     try:
         completion = ProfessorChecklistService.mark_task_incomplete(current_user.id, task_id)
+        if request.accept_mimetypes.accept_html and not request.accept_mimetypes.accept_json:
+            return redirect(url_for('professor.task_detail', task_id=task_id))
         return jsonify({
             'message': 'Tarefa marcada como pendente',
             'task_id': completion.task_id,

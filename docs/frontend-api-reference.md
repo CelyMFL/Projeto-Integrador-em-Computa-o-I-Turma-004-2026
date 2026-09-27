@@ -1,35 +1,54 @@
 # Front-end API Reference
 
-Guia de integração das telas com exemplos reais de payload.
+Guia atualizado dos contratos HTTP atuais do projeto.
 
-Base URL local: http://localhost:5000
+Base local: http://localhost:5000
 
-Observações gerais:
-- As rotas protegidas exigem sessão autenticada (cookie de login Flask).
-- Respostas de erro de permissão usam HTTP 403 com {"error": "Acesso negado"}.
-- Respostas de validação geralmente usam HTTP 400 com {"error": "..."}.
+## Convenções gerais
 
-## 1) Login
+- Rotas protegidas exigem sessão autenticada via cookie do Flask-Login.
+- Erro de permissão: HTTP 403 com {"error": "Acesso negado"} (quando aplicável).
+- Erro de validação/regra de negócio: HTTP 400 com {"error": "..."}.
+- Algumas rotas aceitam tanto JSON quanto form-data.
+- Em rotas híbridas (HTML + JSON), JSON só é retornado quando o cliente pede explicitamente Accept: application/json sem preferência por HTML.
+- O front-end atual usa formulários inline e `fetch()` nas telas administrativas para criar/editar trilhas, tarefas e professores.
+
+## 1) Autenticação
 
 ### GET /auth/login
-Retorna HTML da tela de login.
+
+Retorno:
+- HTML (tela de login)
 
 ### POST /auth/login
-Content-Type: application/x-www-form-urlencoded
 
-Campos:
-- email
-- senha
+Entrada:
+- application/x-www-form-urlencoded
+- campos: email, senha
 
 Comportamento:
-- admin redireciona para /admin/
-- professor redireciona para /professor/dashboard
+- credenciais válidas + role admin: redirect para /admin/
+- credenciais válidas + role professor: redirect para /professor/dashboard
+- falha: renderiza novamente a tela de login
 
-## 2) Professor - Dashboard / Minha integração
+### GET /auth/logout
+
+Comportamento:
+- encerra sessão
+- redirect para /auth/login
+
+## 2) Professor
 
 ### GET /professor/dashboard
 
-Exemplo de resposta:
+Permissão:
+- apenas professor
+
+Retorno:
+- HTML: renderiza dashboard.html
+- JSON (quando solicitado): payload de dashboard
+
+Exemplo JSON:
 
 ```json
 {
@@ -42,112 +61,137 @@ Exemplo de resposta:
   "trilhas_atribuidas": [
     {
       "id": 1,
-      "nome": "Onboarding Pedagogico",
-      "tipo": "pedagogica",
-      "descricao": "Primeiros passos pedagógicos",
+      "nome": "Trilha Pedagógica",
+      "tipo": "pedagógica",
+      "descricao": "Orientações sobre práticas pedagógicas",
       "obrigatoria": true,
       "status": "em_andamento",
       "progresso": {
-        "total_tarefas": 4,
+        "total_tarefas": 5,
         "tarefas_concluidas": 2,
-        "percentual": 50.0
+        "percentual": 40.0
       },
       "tasks": [
         {
           "id": 10,
-          "descricao": "Ler plano de ensino",
+          "descricao": "Atividade Pedagógica 1",
           "ordem": 1,
           "status": "concluido",
-          "material_apoio": "Guia do professor",
-          "link_apoio": "https://escola.local/guias/professor",
-          "documento_apoio": "plano-ensino.pdf"
+          "material_apoio": null,
+          "link_apoio": null,
+          "documento_apoio": null
         }
       ]
     }
   ],
   "progresso_geral": {
-    "total_tarefas": 8,
+    "total_tarefas": 9,
     "tarefas_concluidas": 3,
-    "percentual": 37.5
+    "percentual": 33.33333333333333
   },
   "proximas_tarefas": [
     {
-      "task_id": 12,
-      "descricao": "Configurar ambiente virtual",
+      "task_id": 11,
+      "descricao": "Atividade Pedagógica 2",
       "trilha_id": 1
     }
   ],
   "trilhas_obrigatorias": [
     {
       "id": 1,
-      "nome": "Onboarding Pedagogico",
+      "nome": "Trilha Pedagógica",
       "status": "em_andamento"
     }
   ]
 }
 ```
 
-## 3) Professor - Tela da trilha
+Observação:
+- o percentual exibido no dashboard é calculado dinamicamente a partir das conclusões do professor.
 
 ### GET /professor/trilhas/<trilha_id>
 
-Exemplo:
-- GET /professor/trilhas/1
+Permissão:
+- apenas professor
 
-Resposta:
+Retorno:
+- HTML: renderiza trilha.html
+- JSON (quando solicitado): trilha serializada com progresso e tasks
+
+Erros:
+- 404 quando trilha não existe
+
+### GET /professor/tarefas/<task_id>
+
+Permissão:
+- apenas professor
+
+Retorno:
+- HTML: renderiza tarefa.html
+- JSON (quando solicitado): dados da tarefa + status (concluido|pendente)
+
+Erros:
+- 404 quando tarefa não existe
+
+### GET /professor/feedback
+
+Permissão:
+- apenas professor
+
+Retorno:
+- HTML: renderiza feedback.html
+- JSON (quando solicitado): contexto do formulário
+
+Exemplo JSON:
 
 ```json
 {
-  "id": 1,
-  "nome": "Onboarding Pedagogico",
-  "tipo": "pedagogica",
-  "descricao": "Primeiros passos pedagógicos",
-  "obrigatoria": true,
-  "status": "em_andamento",
-  "progresso": {
-    "total_tarefas": 4,
-    "tarefas_concluidas": 2,
-    "percentual": 50.0
-  },
-  "tasks": [
-    {
-      "id": 10,
-      "descricao": "Ler plano de ensino",
-      "ordem": 1,
-      "status": "concluido",
-      "material_apoio": "Guia do professor",
-      "link_apoio": "https://escola.local/guias/professor",
-      "documento_apoio": "plano-ensino.pdf"
-    }
+  "message": "Formulário de feedback disponível",
+  "campos": ["comentario", "trilha_id (opcional)"],
+  "trilhas_disponiveis": [
+    {"id": 1, "nome": "Trilha Pedagógica"}
   ]
 }
 ```
 
-## 4) Professor - Tela da tarefa
+### POST /professor/feedback
 
-### GET /professor/tarefas/<task_id>
+Permissão:
+- apenas professor
 
-Exemplo:
-- GET /professor/tarefas/10
+Entrada:
+- JSON ou form-data
+- campos:
+  - comentario (obrigatório)
+  - trilha_id (opcional)
 
-Resposta:
+Retorno:
+- se cliente HTML: redirect para /professor/dashboard
+- se cliente JSON: HTTP 201 com feedback criado
+
+Exemplo resposta JSON 201:
 
 ```json
 {
-  "id": 10,
-  "descricao": "Ler plano de ensino",
-  "status": "concluido",
-  "checklist_id": 1,
-  "material_apoio": "Guia do professor",
-  "link_apoio": "https://escola.local/guias/professor",
-  "documento_apoio": "plano-ensino.pdf"
+  "id": 7,
+  "comentario": "A trilha foi clara e bem estruturada.",
+  "trilha_id": 1,
+  "data_envio": "2026-05-12T14:10:11.778899"
 }
 ```
 
-### Ações de conclusão de tarefa
+## 3) Tasks
 
-#### POST /tasks/<task_id>/complete
-Resposta:
+### POST /tasks/<task_id>/complete
+
+Permissão:
+- apenas professor
+
+Retorno:
+- se cliente HTML: redirect para /professor/tarefas/<task_id>
+- se cliente JSON: status da conclusão
+
+Exemplo JSON:
 
 ```json
 {
@@ -157,74 +201,209 @@ Resposta:
 }
 ```
 
-#### POST /tasks/<task_id>/incomplete
-Resposta:
+### POST /tasks/<task_id>/incomplete
 
-```json
-{
-  "message": "Tarefa marcada como pendente",
-  "task_id": 10,
-  "concluido": false
-}
-```
+Permissão:
+- apenas professor
 
-#### GET /tasks/<task_id>/status
-Resposta:
+Retorno:
+- se cliente HTML: redirect para /professor/tarefas/<task_id>
+- se cliente JSON: status atualizado
+
+### GET /tasks/<task_id>/status
+
+Permissão:
+- apenas professor
+
+Retorno:
+- JSON sempre
+
+Exemplo:
 
 ```json
 {
   "task_id": 10,
   "concluido": true,
-  "data_conclusao": "2026-04-23T18:03:47.123456"
+  "data_conclusao": "2026-05-12T13:03:47.123456"
 }
 ```
 
-## 5) Professor - Feedback
-
-### GET /professor/feedback
-
-Resposta:
+Se não houver registro de conclusão:
 
 ```json
 {
-  "message": "Formulário de feedback disponível",
-  "campos": ["comentario", "trilha_id (opcional)"],
-  "trilhas_disponiveis": [
-    { "id": 1, "nome": "Onboarding Pedagogico" }
-  ]
+  "task_id": 10,
+  "concluido": false
 }
 ```
 
-### POST /professor/feedback
+### PUT/PATCH /tasks/<task_id>
 
-Body JSON:
+Permissão:
+- apenas admin
+
+Entrada:
+- JSON ou form-data
+- campos opcionais: descricao, ordem, material_apoio, link_apoio, documento_apoio
+
+Retorno:
+- JSON da tarefa atualizada
+
+### DELETE /tasks/<task_id>
+
+Permissão:
+- apenas admin
+
+Retorno:
+
+```json
+{"message": "Tarefa removida com sucesso"}
+```
+
+### POST /tasks/trilhas/<trilha_id>/reorder
+
+Permissão:
+- apenas admin
+
+Entrada:
+- JSON/form-data com task_ids
+- task_ids pode ser lista ou string CSV
+
+Exemplo:
 
 ```json
 {
-  "comentario": "A trilha foi clara e bem estruturada.",
-  "trilha_id": 1
+  "task_ids": [12, 10, 11]
 }
 ```
 
-Resposta 201:
+Retorno:
+
+```json
+{"message": "Tarefas reordenadas com sucesso"}
+```
+
+## 4) Trilhas
+
+### GET /trilhas/
+
+Permissão:
+- usuário autenticado (admin ou professor)
+
+Retorno:
+- JSON (lista completa de trilhas com tasks ordenadas)
+
+### GET /trilhas/<trilha_id>
+
+Permissão:
+- usuário autenticado (admin ou professor)
+
+Retorno:
+- JSON de uma trilha com tasks
+
+### POST /trilhas/
+
+Permissão:
+- apenas admin
+
+Entrada:
+- JSON ou form-data
+- nome (obrigatório)
+- descricao (opcional)
+- tipo (opcional): pedagógica | institucional | tecnológica
+- obrigatoria (opcional): true/false, 1/0, sim/yes
+
+Retorno:
+- HTTP 201 com trilha criada
+
+### PUT/PATCH /trilhas/<trilha_id>
+
+Permissão:
+- apenas admin
+
+Entrada:
+- campos opcionais: nome, descricao, tipo, obrigatoria
+
+Retorno:
+- JSON da trilha atualizada
+
+### DELETE /trilhas/<trilha_id>
+
+Permissão:
+- apenas admin
+
+Retorno:
+
+```json
+{"message": "Trilha removida com sucesso"}
+```
+
+Comportamento adicional:
+- a exclusão limpa dependências ligadas à trilha antes do `DELETE`, incluindo `feedbacks`, `professor_trilhas` e `professor_checklists` associados às `tasks` da trilha.
+
+### POST /trilhas/<trilha_id>/start
+
+Permissão:
+- apenas professor
+
+Retorno:
+- HTTP 201 com status inicial em_andamento
+
+### GET /trilhas/<trilha_id>/progress
+
+Permissão:
+- apenas professor
+
+Retorno:
+- JSON de progresso
+
+Exemplo:
 
 ```json
 {
-  "id": 7,
-  "comentario": "A trilha foi clara e bem estruturada.",
-  "trilha_id": 1,
-  "data_envio": "2026-04-23T18:10:11.778899"
+  "status": "em_andamento",
+  "total_tasks": 5,
+  "completed_tasks": 2,
+  "completion_percentage": 40.0,
+  "data_inicio": "2026-05-12T12:00:00",
+  "data_conclusao": null
 }
 ```
 
-## 6) Admin - Painel
+Observação:
+- este contrato usa `completion_percentage` e não `percentual`.
+
+### POST /trilhas/<trilha_id>/tasks
+
+Permissão:
+- apenas admin
+
+Entrada:
+- JSON ou form-data
+- descricao (obrigatório)
+- ordem (opcional)
+- material_apoio, link_apoio, documento_apoio (opcionais)
+
+Retorno:
+- HTTP 201 com tarefa criada
+
+## 5) Admin
 
 ### GET /admin/
-Retorna HTML do painel administrativo.
+
+Permissão:
+- apenas admin
+
+Retorno:
+- HTML (admin_dashboard.html) com métricas
 
 ### GET /admin/analytics
 
-Resposta:
+Permissão:
+- apenas admin
+
+Retorno:
+- JSON sempre
 
 ```json
 {
@@ -238,143 +417,66 @@ Resposta:
 }
 ```
 
-## 7) Admin - Gestão de professores
-
 ### GET /admin/professores
 
-Resposta:
+Permissão:
+- apenas admin
 
-```json
-[
-  {
-    "id": 3,
-    "nome": "Professor Teste",
-    "email": "prof@test.com",
-    "status": "em_andamento",
-    "trilhas_atribuidas": [
-      { "id": 1, "nome": "Onboarding Pedagogico" }
-    ],
-    "andamento": {
-      "total_tarefas": 8,
-      "tarefas_concluidas": 3,
-      "percentual": 37.5
-    }
-  }
-]
-```
+Retorno:
+- HTML (admin_professores.html)
+
+Observação:
+- apesar de montar payload interno com dados de progresso, esta rota atualmente renderiza template (não expõe JSON).
 
 ### POST /admin/professores
 
-Body JSON:
+Permissão:
+- apenas admin
 
-```json
-{
-  "nome": "Novo Professor",
-  "email": "novo.prof@escola.com",
-  "senha": "123456"
-}
-```
+Entrada:
+- JSON ou form-data com nome, email, senha
 
-Resposta 201:
-
-```json
-{
-  "id": 21,
-  "nome": "Novo Professor",
-  "email": "novo.prof@escola.com",
-  "role": "professor"
-}
-```
+Retorno:
+- cliente HTML: redirect para /admin/professores
+- cliente JSON: HTTP 201 com usuário criado
 
 ### PUT/PATCH /admin/professores/<user_id>
 
-Body JSON (exemplo):
+Permissão:
+- apenas admin
 
-```json
-{
-  "nome": "Professor Atualizado",
-  "email": "atualizado@escola.com"
-}
-```
+Entrada:
+- JSON ou form-data com nome/email/senha (opcionais)
 
-## 8) Admin - Gestão de trilhas
+Retorno:
+- JSON sempre
 
 ### GET /admin/trilhas
 
-Resposta:
+Permissão:
+- apenas admin
 
-```json
-[
-  {
-    "id": 1,
-    "nome": "Onboarding Pedagogico",
-    "tipo": "pedagogica",
-    "obrigatoria": true,
-    "descricao": "Primeiros passos pedagógicos",
-    "total_tarefas": 4
-  }
-]
-```
-
-### CRUD de trilhas
-
-- GET /trilhas/
-- POST /trilhas/
-- GET /trilhas/<trilha_id>
-- PUT/PATCH /trilhas/<trilha_id>
-- DELETE /trilhas/<trilha_id>
-- POST /trilhas/<trilha_id>/start
-- GET /trilhas/<trilha_id>/progress
-
-## 9) Admin - Gestão de tarefas e feedbacks
+Retorno:
+- HTML (admin_trilhas.html)
 
 ### GET /admin/tarefas-feedbacks
 
-Resposta:
+Permissão:
+- apenas admin
 
-```json
-{
-  "tarefas_por_trilha": [
-    {
-      "trilha_id": 1,
-      "trilha_nome": "Onboarding Pedagogico",
-      "tarefas": [
-        {
-          "id": 10,
-          "descricao": "Ler plano de ensino",
-          "ordem": 1,
-          "material_apoio": "Guia do professor",
-          "link_apoio": "https://escola.local/guias/professor",
-          "documento_apoio": "plano-ensino.pdf"
-        }
-      ]
-    }
-  ],
-  "feedbacks": [
-    {
-      "id": 7,
-      "professor_id": 3,
-      "trilha_id": 1,
-      "comentario": "A trilha foi clara e bem estruturada.",
-      "data_envio": "2026-04-23T18:10:11.778899"
-    }
-  ]
-}
-```
+Retorno:
+- HTML (admin_tarefas.html)
 
-### Gestão de tarefas
+## 6) Erros e status comuns
 
-- POST /trilhas/<trilha_id>/tasks
-- PUT/PATCH /tasks/<task_id>
-- DELETE /tasks/<task_id>
-- POST /tasks/trilhas/<trilha_id>/reorder
+- 201: criação bem-sucedida
+- 400: validação ou regra de negócio
+- 403: acesso negado por role
+- 404: recurso não encontrado (principalmente em professor/trilhas e professor/tarefas)
 
-Exemplo de reorder:
+## 7) Observações para integração de front-end
 
-POST /tasks/trilhas/1/reorder
-
-```json
-{
-  "task_ids": [12, 10, 11]
-}
-```
+- Endpoints do namespace /admin para listagem principal retornam HTML, não JSON.
+- Endpoints do namespace /trilhas retornam JSON.
+- Endpoints de professor GET são híbridos (HTML/JSON conforme Accept).
+- Endpoints de completar/incompletar tarefa podem redirecionar no fluxo HTML tradicional.
