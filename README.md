@@ -1,53 +1,55 @@
-# Projeto Integrador - Backend de Onboarding Docente
+# Projeto Integrador - Onboarding Docente
 
-Backend Flask para onboarding de professores, com autenticação, trilhas, tarefas e feedback.
+Aplicação Flask para onboarding de professores com autenticação por sessão, trilhas, tarefas, acompanhamento de progresso e feedback.
 
-Este repositório foi consolidado para manter somente fluxos ativos ou planejados para o produto atual.
+O projeto combina duas formas de entrega no mesmo backend:
+- telas HTML server-side renderizadas com Jinja2
+- endpoints JSON para integração com front-end/API clients
 
-## Escopo Atual
+## Escopo atual
 
-Perfis suportados:
+Perfis:
 - professor
 - admin
 
-Fluxos suportados:
-- login com sessão
-- dashboard do professor
-- visualização de trilha e tarefa
-- conclusão de tarefa
+Fluxos implementados:
+- login/logout com Flask-Login
+- dashboard do professor (trilhas atribuídas, progresso geral, próximas tarefas)
+- detalhe de trilha e detalhe de tarefa
+- marcar tarefa como concluída/pendente
 - envio de feedback do professor
-- painel e gestão administrativa (professores, trilhas, tarefas e feedbacks)
+- painel administrativo com métricas
+- gestão administrativa de professores, trilhas e tarefas
 
 ## Arquitetura
 
-A aplicação segue camadas:
-
-- routes: endpoints HTTP (contrato consumido pelo front)
-- services: regras de negócio
-- models: entidades do banco
+Camadas principais:
+- routes: contratos HTTP e controle de acesso
+- services: regras de negócio e validações
+- models: entidades SQLAlchemy
+- templates/static: interface renderizada pelo backend
 - database: MySQL
 
-Estrutura principal:
-
+Estrutura:
 - app/models
 - app/services
 - app/routes
 - app/templates
+- app/static
 - app/__init__.py
 
 ## Stack
 
-- Python
+- Python 3
 - Flask
 - Flask-Login
-- Flask-SQLAlchemy
-- SQLAlchemy
-- MySQL
-- Docker
+- Flask-SQLAlchemy / SQLAlchemy
+- PyMySQL
+- MySQL 8 (docker-compose)
 
-## Execução Local
+## Execução local
 
-1. Subir banco MySQL:
+1. Subir MySQL:
 
 ```bash
 docker-compose up -d
@@ -59,199 +61,155 @@ docker-compose up -d
 pip install -r requirements.txt
 ```
 
-3. Criar tabelas:
+3. Criar schema:
 
 ```bash
 python create_db.py
 ```
 
-4. Rodar aplicação:
+4. Rodar app:
 
 ```bash
 python run.py
 ```
 
-Aplicação em http://localhost:5000.
+Aplicação: http://localhost:5000
 
-## Modelo de Dados Ativo
+## Atualizações recentes
 
-### User
-- nome
-- email
-- senha (hash)
+- telas administrativas ganharam formulários inline para criar/editar trilhas, criar tarefas e editar professores
+- `seed.py` foi ajustado para resetar o banco MySQL com segurança operacional, inclusive em presença de FKs legadas
+- a exclusão de trilha agora remove dependências ligadas (`feedbacks`, `professor_trilhas` e `professor_checklists`) antes de apagar a trilha
+- a plataforma foi validada com smoke tests exaustivos em `auth`, `admin`, `professor`, `tasks` e `trilhas`
+
+## Popular dados de desenvolvimento (opcional)
+
+Para resetar e popular o banco com dados de exemplo:
+
+```bash
+python seed.py
+```
+
+Credenciais de seed:
+- admin: admin@test.com / 123
+- professor: prof@test.com / 123
+
+## Modelo de dados
+
+User:
+- id, nome, email, senha (hash)
 - role: professor | admin
 
-### Checklist (trilha)
-- nome
-- descricao
-- tipo: pedagogica | institucional | tecnologica
-- obrigatoria
+Checklist (trilha):
+- id, nome, descricao
+- tipo: pedagógica | institucional | tecnológica
+- obrigatoria (bool)
 
-### Task
-- descricao
-- ordem
+Task:
+- id, descricao, ordem
 - checklist_id
-- material_apoio
-- link_apoio
-- documento_apoio
+- material_apoio, link_apoio, documento_apoio
 
-### ProfessorTrilha
-- professor_id
-- trilha_id
+ProfessorTrilha:
+- professor_id, trilha_id
 - status: nao_iniciado | em_andamento | concluido
-- data_inicio
-- data_conclusao
+- data_inicio, data_conclusao
 
-### ProfessorChecklist
-- professor_id
-- task_id
-- concluido
-- data_conclusao
+ProfessorChecklist:
+- professor_id, task_id
+- concluido, data_conclusao
 
-### Feedback
+Feedback:
 - professor_id
 - trilha_id (opcional)
-- comentario
-- data_envio
+- comentario, data_envio
 
-## Rotas e Contratos para Front-end
-
-Todas as rotas abaixo exigem sessão autenticada, exceto login.
+## Rotas principais
 
 ### Autenticação
 
-- GET /auth/login
-  - Exibe tela de login atual.
+- GET /auth/login: tela de login
+- POST /auth/login: autentica e redireciona por role
+- GET /auth/logout: encerra sessão
 
-- POST /auth/login
-  - Form-data: email, senha
-  - Redireciona:
-    - admin -> /admin/
-    - professor -> /professor/dashboard
-
-- GET /auth/logout
-  - Encerra sessão.
-
-## Professor - 4 telas
-
-### 1) Dashboard / Minha integração
+### Professor
 
 - GET /professor/dashboard
-
-Retorna:
-- user
-- trilhas_atribuidas
-- progresso_geral
-- proximas_tarefas
-- trilhas_obrigatorias
-
-### 2) Tela da trilha
-
 - GET /professor/trilhas/<trilha_id>
-
-Retorna:
-- dados da trilha
-- status da trilha para o professor
-- progresso na trilha
-- tasks com status individual
-
-### 3) Tela da tarefa
-
 - GET /professor/tarefas/<task_id>
+- GET /professor/feedback
+- POST /professor/feedback
 
-Retorna:
-- descricao
-- status
-- checklist_id
-- material_apoio
-- link_apoio
-- documento_apoio
+Observação de resposta:
+- as rotas GET acima retornam HTML por padrão no navegador
+- retornam JSON somente quando o cliente pede explicitamente Accept: application/json (sem preferência por HTML)
 
-Marcar concluida/pendente:
+### Tasks
+
 - POST /tasks/<task_id>/complete
 - POST /tasks/<task_id>/incomplete
 - GET /tasks/<task_id>/status
+- PUT/PATCH /tasks/<task_id> (admin)
+- DELETE /tasks/<task_id> (admin)
+- POST /tasks/trilhas/<trilha_id>/reorder (admin)
 
-### 4) Feedback
+### Trilhas
 
-- GET /professor/feedback
-  - Contexto para formulário (campos e trilhas disponíveis).
-
-- POST /professor/feedback
-  - Body JSON ou form-data:
-    - comentario (obrigatorio)
-    - trilha_id (opcional)
-
-## Admin - 4 telas
-
-### 1) Painel administrativo
-
-- GET /admin/
-  - Renderiza template administrativo mínimo com métricas.
-
-- GET /admin/analytics
-  - Retorna métricas em JSON:
-    - total_users
-    - total_professores
-    - total_trilhas
-    - total_obrigatorias
-    - total_feedbacks
-    - trilhas_concluidas
-    - trilhas_em_andamento
-
-### 2) Gestão de professores
-
-- GET /admin/professores
-  - Lista professores, status, trilhas atribuídas e andamento.
-
-- POST /admin/professores
-  - Cria professor.
-  - Campos: nome, email, senha.
-
-- PUT/PATCH /admin/professores/<user_id>
-  - Edita professor.
-  - Campos opcionais: nome, email, senha.
-
-### 3) Gestão de trilhas
-
-- GET /admin/trilhas
-  - Lista trilhas (nome, tipo, obrigatória/opcional, descrição, total de tarefas).
-
-CRUD de trilhas e atribuição funcional:
 - GET /trilhas/
-- POST /trilhas/
 - GET /trilhas/<trilha_id>
-- PUT/PATCH /trilhas/<trilha_id>
-- DELETE /trilhas/<trilha_id>
-- POST /trilhas/<trilha_id>/start
-- GET /trilhas/<trilha_id>/progress
+- POST /trilhas/ (admin)
+- PUT/PATCH /trilhas/<trilha_id> (admin)
+- DELETE /trilhas/<trilha_id> (admin)
+- POST /trilhas/<trilha_id>/start (professor)
+- GET /trilhas/<trilha_id>/progress (professor)
+- POST /trilhas/<trilha_id>/tasks (admin)
 
-### 4) Gestão de tarefas / feedbacks
+### Admin
 
-- GET /admin/tarefas-feedbacks
-  - Retorna tarefas por trilha e feedbacks enviados.
+- GET /admin/: dashboard HTML
+- GET /admin/analytics: métricas JSON
+- GET /admin/professores: gestão HTML
+- POST /admin/professores: cria professor (redirect HTML ou JSON 201)
+- PUT/PATCH /admin/professores/<user_id>: atualiza professor (JSON)
+- GET /admin/trilhas: gestão HTML
+- GET /admin/tarefas-feedbacks: gestão HTML
 
-Gestão de tarefas:
-- POST /trilhas/<trilha_id>/tasks
-- PUT/PATCH /tasks/<task_id>
-- DELETE /tasks/<task_id>
-- POST /tasks/trilhas/<trilha_id>/reorder
+## Permissões
 
-## Regras de Permissão
+- rotas /admin: somente admin
+- jornada /professor: somente professor
+- create/update/delete de trilha/tarefa: somente admin
+- completar tarefa e consultar status da própria tarefa: somente professor
+- /trilhas/ (listar/obter): exige login, sem restrição explícita por role
 
-- professor:
-  - pode acessar rotas /professor
-  - pode atualizar status de tarefas em /tasks/<id>/complete|incomplete
-  - nao pode acessar rotas /admin
+## Regras de negócio importantes
 
-- admin:
-  - pode acessar rotas /admin, /trilhas e rotas administrativas de /tasks
-  - nao usa rotas de jornada do professor
+- ao concluir tarefa, o sistema registra ProfessorChecklist e tenta concluir automaticamente a trilha quando todas as tarefas estão concluídas
+- ao voltar tarefa para pendente, trilha concluída pode retornar para em_andamento
+- ordenação de tarefas usa campo ordem e endpoint dedicado de reorder
+- ao remover uma trilha, o serviço também remove feedbacks, vínculos de professor e conclusões de tarefas associados para evitar falhas de integridade
 
-## Observação de Banco
+## Validação realizada
 
-Se o banco já estava criado antes das últimas mudanças, pode ser necessário atualizar schema para:
-- remoção/ajuste de enum antigo de role
-- inclusão dos campos de apoio em tasks
+Smoke tests executados com sucesso cobrindo:
+- autenticação e logout
+- páginas administrativas HTML
+- criação/edição/exclusão de trilha
+- criação/edição/exclusão de tarefa
+- dashboard e páginas JSON do professor
+- envio de feedback
+- marcação de tarefa concluída e pendente
 
-O projeto ainda usa create_all (sem migrations automáticas).
+Observação:
+- `GET /trilhas/<id>/progress` retorna `completion_percentage` no JSON atual
+
+## Documentação da API
+
+Detalhes de payloads e modos de resposta estão em:
+- docs/frontend-api-reference.md
+
+## Observações técnicas
+
+- sem migrations automáticas: schema é gerenciado com create_all/drop_all
+- seed.py executa drop_all e apaga dados existentes
+- app/services/checklist_service.py está presente, porém sem implementação

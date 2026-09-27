@@ -1,6 +1,6 @@
 """Rotas voltadas ao perfil Professor, mapeadas diretamente para as telas do frontend."""
 
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from app.models import RoleEnum, Checklist, Task, ProfessorTrilha, StatusEnum, ProfessorChecklist
 from app.services.feedback_service import FeedbackService
@@ -228,6 +228,8 @@ def submit_feedback():
             comentario=data.get('comentario'),
             trilha_id=int(data['trilha_id']) if data.get('trilha_id') not in (None, '') else None,
         )
+        if request.accept_mimetypes.accept_html and not request.accept_mimetypes.accept_json:
+            return redirect(url_for('professor.dashboard'))
         return jsonify({
             'id': item.id,
             'comentario': item.comentario,

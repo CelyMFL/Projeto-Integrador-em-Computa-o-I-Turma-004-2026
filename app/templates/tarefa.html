@@ -78,7 +78,13 @@
       <div class="actions">
         <a href="{{ url_for('professor.trilha_detail', trilha_id=task.checklist_id) }}" class="button secondary">Voltar para trilha</a>
         {% if task.status != 'concluido' %}
-        <button class="button">Marcar como concluída</button>
+        <form action="{{ url_for('tasks.complete_task', task_id=task.id) }}" method="POST" style="display: inline;">
+            <button type="submit" class="button">Marcar como concluída</button>
+        </form>
+        {% else %}
+        <form action="{{ url_for('tasks.incomplete_task', task_id=task.id) }}" method="POST" style="display: inline;">
+            <button type="submit" class="button secondary" style="border-color: var(--color-warning); color: var(--color-warning);">Marcar como pendente</button>
+        </form>
         {% endif %}
       </div>
     </section>

@@ -1,4 +1,4 @@
-from app.models import Checklist, TipoEnum, Task
+from app.models import Checklist, TipoEnum, Task, ProfessorTrilha, ProfessorChecklist, Feedback
 from app import db
 
 
@@ -118,6 +118,14 @@ class TrilhaService:
             raise ValueError(f"Trilha with ID {trilha_id} not found")
         
         try:
+            task_ids = [task.id for task in Task.query.filter_by(checklist_id=trilha_id).all()]
+
+            if task_ids:
+                ProfessorChecklist.query.filter(ProfessorChecklist.task_id.in_(task_ids)).delete(synchronize_session=False)
+
+            Feedback.query.filter_by(trilha_id=trilha_id).delete(synchronize_session=False)
+            ProfessorTrilha.query.filter_by(trilha_id=trilha_id).delete(synchronize_session=False)
+
             # Delete all tasks in trilha first
             Task.query.filter_by(checklist_id=trilha_id).delete()
             db.session.delete(trilha)
