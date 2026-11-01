@@ -1,26 +1,23 @@
 :root {
-  --admin-bg: #f6f4ef;
-  --admin-surface: #fffefb;
-  --admin-text: #102a43;
-  --admin-muted: #486581;
-  --admin-border: #d9d3c7;
-  --admin-primary: #0f766e;
-  --admin-primary-dark: #115e59;
-  --admin-accent: #b45309;
-  --admin-danger: #b91c1c;
-  --admin-ok: #0f766e;
-  --admin-warn: #b45309;
+  --admin-bg: #f4f6f8;
+  --admin-surface: #ffffff;
+  --admin-text: #1f2933;
+  --admin-muted: #66788a;
+  --admin-border: #d9e2ec;
+  --admin-primary: #2563eb;
+  --admin-primary-dark: #1d4ed8;
+  --admin-accent: #f59e0b;
+  --admin-danger: #dc2626;
+  --admin-ok: #16a34a;
+  --admin-warn: #f59e0b;
 }
 
 body {
-  background:
-    radial-gradient(circle at 10% 10%, rgba(15, 118, 110, 0.10), transparent 40%),
-    radial-gradient(circle at 95% 0%, rgba(180, 83, 9, 0.10), transparent 34%),
-    var(--admin-bg);
+  background: var(--admin-bg);
 }
 
 .admin-topbar {
-  background: linear-gradient(160deg, #fffdf8 0%, #f6f4ef 100%);
+  background: var(--admin-surface);
   border-bottom: 1px solid var(--admin-border);
 }
 
@@ -53,14 +50,14 @@ body {
 }
 
 .admin-topnav a {
-  border-color: #b8e0dc;
+  border-color: #bfdbfe;
   color: var(--admin-primary);
   background: #ffffff;
 }
 
 .admin-topnav a:hover,
 .admin-topnav a.active {
-  background: #d7f0ec;
+  background: #eff6ff;
   color: var(--admin-primary-dark);
 }
 
@@ -71,9 +68,9 @@ body {
 
 
 .journey-pill {
-  background: #f1ebe1;
-  border: 1px solid #d8c8ac;
-  color: #7c2d12;
+  background: #f1f5f9;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 12px;
@@ -160,10 +157,10 @@ body {
   border: 1px solid var(--admin-border);
   border-radius: 12px;
   padding: 11px 14px;
-  background: #fffefb;
+  background: #ffffff;
   color: var(--admin-text);
   font-size: 16px;
-  box-shadow: inset 0 1px 2px rgba(16, 42, 67, 0.04);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
@@ -175,7 +172,7 @@ body {
 .admin-container input:not([type="checkbox"]):not([type="radio"]):hover,
 .admin-container select:hover,
 .admin-container textarea:hover {
-  border-color: #b8ad96;
+  border-color: #9fb3c8;
 }
 
 .admin-container input:not([type="checkbox"]):not([type="radio"]):focus-visible,
@@ -185,7 +182,7 @@ body {
   outline: none;
   border-color: var(--admin-primary);
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .admin-container input[type="checkbox"] {
@@ -214,8 +211,8 @@ body {
 }
 
 .card-highlight {
-  background: linear-gradient(160deg, #fffefb 0%, #f9f6ee 100%);
-  border-color: #eadfca;
+  background: #f8fafc;
+  border-color: var(--admin-border);
 }
 
 .admin-empty {
@@ -316,8 +313,8 @@ body {
 }
 
 .journey-steps .journey-pill.current {
-  background: #d7f0ec;
-  border-color: #b8e0dc;
+  background: #eff6ff;
+  border-color: #bfdbfe;
   color: var(--admin-primary-dark);
 }
 
@@ -387,7 +384,7 @@ body {
   padding: 12px 14px;
   border: 1px solid var(--admin-border);
   border-radius: 12px;
-  background: #fffefb;
+  background: #ffffff;
 }
 
 .assign-main {
@@ -426,7 +423,7 @@ body {
   border: 1px solid var(--admin-border);
   border-left-width: 5px;
   border-radius: 10px;
-  background: #fffefb;
+  background: #ffffff;
 }
 
 .review-add { border-left-color: var(--admin-ok); }
@@ -454,7 +451,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #d7f0ec;
+  background: #eff6ff;
   color: var(--admin-primary-dark);
   font-weight: 800;
 }
